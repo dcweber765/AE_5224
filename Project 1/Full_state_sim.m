@@ -2,6 +2,29 @@
 
 clear all; clear all;
 
+%% STATE
+%   x = x
+%       y
+%       z
+%       u_t
+%       v_t
+%       w_t
+%       u_b
+%       v_b
+%       w_b
+%       V_a
+%       alpha
+%       Beta
+%       psi
+%       theta
+%       phi
+%       p
+%       q
+%       r
+      
+
+
+
 
 %% Constants needed for calculations (In Imperial units)
 g = 9.8;                           %Gravitational acceleration [ft/sec^2]
@@ -246,206 +269,3 @@ B_lat = [Y_deltaa/m                              Y_deltar/m;
          0                                       0]
      
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Determine if the aircraft is dynamically stable 
-eig_long = eig(A_long)                 %Calculates the eigenvalues of A_long
-eig_lat = eig(A_lat)                   %Calculates the eigenvalues of A_lat
-
-% Longitudinal dynamic stability
-if eig_long < 0
-    fprintf('The aircraft is longitudinally dynamically stable \n')
-else
-    fprintf('The aircraft is not longitudinally dynamically stable \n')
-end
-
-% Lateral dynamic stability
-if eig_lat < 0
-    fprintf('The aircraft is laterally dynamically stable \n')
-else
-    fprintf('The aircraft is not laterally dynamically stable \n')
-end
-
-if eig_long < 0 & eig_lat < 0
-    fprintf('The aircraft is dynamically stable \n')
-else
-    fprintf('The aircraft is not dynamically stable \n')
-end
-fprintf('\n')
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Determine the settling times of the phugoid mode and of the roll convergence mode
-%Phugoid mode
-t_s_phugoid = 4/min(abs(real(eig_long)));
-fprintf('The settling time for the phugoid mode is = %.3f seconds\n', t_s_phugoid)
-
-%Roll convergence mode
-t_s_roll_convg = 4/max(abs(real(eig_lat)));
-fprintf('The settling time for the roll convergence mode is = %.3f seconds\n', t_s_roll_convg)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Plot the impulse and step response of the following input-output pairs: [elevator, pitch angle] [thrust, speed] [rudder, yaw] [aileron, roll angle]
-    %All control inputs: [aileron (da), rudder (dr), elvator (de), thrust/throttle (dt)]
-    %NOTE: longitudinal control inputs are: [elvator (de), thrust/throttle (dt)]
-    %B_long matrix is set up such that "de" is the first input, and "dt" is the second input
-    
-long_sys = ss(A_long, B_long, eye(4), zeros(4,2));          %Creates a State System with state variables A, B, C, and D
-figure; impulse(long_sys)                                   %Plots the impulse response for all input-output pairs
-figure; step(long_sys)                                      %Plots the step response for all input-output pairs
-lat_sys = ss([A_lat zeros(4,1); 0 0 sec(theta0) 0 0], [B_lat; 0 0], eye(5), zeros(5,2));
-figure; impulse(lat_sys)
-figure; step(lat_sys)
-
-long_sys_el2pitch = ss(A_long, B_long(:,1)*pi/180, [0 0 0 1], 0);
-long_sys_tr2speed = ss(A_long, B_long(:,2), [1 0 0 0], 0);
-B_lat_wYaw = [B_lat; 0 0];
-
-lat_sys_aileron2roll = ss(A_lat, B_lat(:,1)*pi/180, [0 0 0 1], 0);
-%lat_sys_aileron2rollRate = ss(A_lat, B_lat(:,1)*pi/180, [0 1 0 0], 0);
-lat_sys_rud2yaw = ss([A_lat zeros(4,1); 0 0 sec(theta0) 0 0], B_lat_wYaw(:,2)*pi/180, [0 0 0 0 1], 0);
-
-figure
-sgtitle("Elavator to Pitch")
-subplot(121)
-impulse(long_sys_el2pitch)
-title("Impulse")
-ylabel("\Delta\circ")
-subplot(122)
-step(long_sys_el2pitch)
-title("Step")
-ylabel("\Delta\circ")
-
-figure
-sgtitle("Aileron to roll")
-subplot(121)
-impulse(lat_sys_aileron2roll)
-title("Impulse")
-ylabel("\Delta\circ")
-subplot(122)
-step(lat_sys_aileron2roll)
-title("Step")
-ylabel("\Delta\circ")
-
-figure
-sgtitle("Thrust to Speed")
-subplot(121)
-impulse(long_sys_tr2speed)
-title("Impulse")
-ylabel("\Delta ft/s")
-subplot(122)
-step(long_sys_tr2speed)
-title("Step")
-ylabel("\Delta ft/s")
-
-figure
-sgtitle("Rudder to Yaw")
-subplot(121)
-impulse(lat_sys_rud2yaw)
-title("Impulse")
-ylabel("\Delta\circ")
-subplot(122)
-step(lat_sys_rud2yaw)
-title("Step")
-ylabel("\Delta\circ")
-
-%% % Problem 2 % %% (Stick-fixed response)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%% Controlled (closed-loop) response
-% Create desired eigenvalues and thus settling times
-desired_ev = [ -0.9873 + 2.6324i; -0.9873 - 2.6324i; -0.05 + 0.1115i; -0.05 - 0.1115i];
-desired_settling_time = 4/0.05;
-
-%Control design is about designing the right gain matrix K
-K_long = place(A_long, B_long, desired_ev);
-
-[t_sim_long, x_long] = ode45(@(t,x) (A_long-B_long*K_long)*x, [0 100], [10 0 0 0]');  %Last array is the distrubance introduced into the system
-
-%% Rate of Change Plots %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-theta0 = 0;     %Initial pitch angle of the aircraft
-u0 = 677;       %Initial velocity of the aircraft
-
-A_long_with_altitude = [A_long, zeros(4,1);
-                        -sin(theta0), cos(theta0), 0, -u0*cos(theta0), 0];
-B_long_with_altitude = [B_long; 0 0];
-                    
-[t_sim_long, x_long] = ode45(@(t,xi) A_long_with_altitude*xi, [0 400], [10 0 0 0 0]');      %Stick-fixed response (no control component)
-
-K_altitude_hold = lqr(A_long_with_altitude, B_long_with_altitude, 0.01*eye(5), 10*eye(2), zeros(5,2))
-
-[t_sim_long_cl, x_long_cl] = ode45(@(t,xi_cl) (A_long_with_altitude-B_long_with_altitude*K_altitude_hold)*(xi_cl - [0; 0; 0; 0; 0]) , [0 400], [10 0 0 0 0]');
-
-control_input_long = -K_altitude_hold*x_long_cl';
-
-figure('Name', 'Longitudinal Stick-Fixed Response')
-subplot(511)
-plot(t_sim_long, x_long(:,1), t_sim_long_cl, x_long_cl(:,1))
-xlabel('t (s)'); ylabel('\Delta u ft/s'); grid on;
-
-subplot(512)
-plot(t_sim_long, x_long(:,2), t_sim_long_cl, x_long_cl(:,2))
-xlabel('t (s)'); ylabel('\Delta w ft/s'); grid on;
-
-subplot(513)
-plot(t_sim_long, x_long(:, 3)*180/pi, t_sim_long_cl, x_long_cl(:,3)*180/pi)
-xlabel('t (s)'); ylabel('\Delta q (\circ/s)'); grid on;
-
-subplot(514)
-plot(t_sim_long, x_long(:, 4)*180/pi, t_sim_long_cl, x_long_cl(:,4)*180/pi)
-xlabel('t (s)'); ylabel('\Delta \theta (\circ)'); grid on;
-
-subplot(515)
-plot(t_sim_long, x_long(:,5), t_sim_long_cl, x_long_cl(:,5))
-xlabel('t (s)'); ylabel('\Delta z_E ft'); grid on; 
-
-figure
-plot(t_sim_long_cl, control_input_long(1,:)*180/pi')
-title("Elevator control input over time")
-xlabel("t(s)"); ylabel("\delta \circ")
-xlim([0 5])
-figure
-plot(t_sim_long_cl, control_input_long(2,:)*180/pi')
-title("Thrust control input over time")
-xlabel("t(s)"); ylabel("\Delta lbs")
-
-%% Lateral stick-fixed response
-%%% Part 2 %%% - Roll Angle
-[t_sim_lat, x_sim_lat] = ode45(@(t,x) A_lat*x, [0 100], [0 1*pi/180 0 0]');
-
-K_lat = lqr(A_lat, B_lat, 0.01*eye(4), 10*eye(2), zeros(4,2));
-
-[t_sim_cl, x_sim_lat_cl] = ode45(@(t,x) (A_lat - B_lat*K_lat)*(x - [0; 0; 0; 5*pi/180]) , [0 100], [0 1*pi/180 0 0]');
-
-control_input_lat = -K_lat*x_sim_lat_cl';
-
-figure('Name', 'Lateral stick fixed');
-subplot(411)
-plot(t_sim_lat, x_sim_lat(:, 1), t_sim_cl, x_sim_lat_cl(:,1))
-xlabel('t (s)'); ylabel('v ft/s'); grid on;
-
-subplot(412)
-plot(t_sim_lat, x_sim_lat(:, 2)*180/pi,  t_sim_cl, x_sim_lat_cl(:,2)*180/pi)
-xlabel('t (s)'); ylabel('p (\circ/s)'); grid on;
-
-
-subplot(413)
-plot(t_sim_lat, x_sim_lat(:, 3)*180/pi,  t_sim_cl, x_sim_lat_cl(:,3)*180/pi)
-xlabel('t (s)'); ylabel('r (\circ/s)'); grid on;
-
-
-subplot(414)
-plot(t_sim_lat, x_sim_lat(:, 4)*180/pi,  t_sim_cl, x_sim_lat_cl(:,4)*180/pi)
-xlabel('t (s)'); ylabel('\phi (\circ)'); grid on; 
-
-figure
-plot(t_sim_cl, control_input_lat*180/pi')
-title("Lateral control Inputs over time")
-xlabel("t(s)"); ylabel("(\circ)")
-legend('\delta a','\delta r')
-xlim([0 10]);
-
-figure
-sideSlip = asin(x_sim_lat_cl(:,1)/u0);
-plot(t_sim_cl, sideSlip*180/pi);
-title("Side Slip angle over time")
-xlabel("t(s)"); ylabel(" \beta (\circ)")
-xlim([0 5]);

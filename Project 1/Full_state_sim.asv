@@ -3,24 +3,24 @@
 clear all; clear all;
 
 %% STATE
-      x = 0;
-      y = 0;
-      z = 0;
-      u_t = 0;
-      v_t = 0;
-      w_t = 0;
-      u_b = 0;
-      v_b = 0;
-      w_b = 0;
-      V_a = 0;
-      alpha = 0;
-      beta = 0;
-      psi = 0;
-      theta = 0;
-      phi = 0;
-      p = 0;
-      q = 0;
-      r = 0;
+%   x = x
+%       y
+%       z
+%       u_t
+%       v_t
+%       w_t
+%       u_b
+%       v_b
+%       w_b
+%       V_a
+%       alpha
+%       beta
+%       psi
+%       theta
+%       phi
+%       p
+%       q
+%       r
       
 p_t = [x;y;z];
 V_t = [u_t;v_t;w_t];
@@ -31,11 +31,19 @@ omega_tb_b = [p;q;r];
 X = [p_t;
     V_t;
     V_b;
-    V_a;X
     alpha;
     beta;
     euler_ang;
     omega_tb_b;]
+
+
+
+%% Constants needed for calculations (In Imperial units)
+g = 9.8;                           %Gravitational acceleration [ft/sec^2]
+% R = 3089.2;                         %Specific gas constant for dry air [lb*ft/sl*K]
+% a1 = -1.9812*10^-3;                 %Temperature gradient [K/ft]
+% rho_sl = 0.0023769;                 %Density at sea level [sl/ft^3]
+% tau_sl = 288.16;                    %Standard temperature at sea level [K]
 
 %% Aircraft Data (Learjet 24 Aircraft)
 % Geometric data
@@ -44,12 +52,11 @@ c_bar = 0.18994;                          %Mean Aerodynamic Chord (MAC) [m]
 b = 2.8956;                             %Wing span [m]
 
 % Flight Conditions Data
-g = 9.8;
 altt = 100;                       %Altitude [m]
 %Mach = 0.7;                         %Mach of the aircraft [unitless]
 V = 30;                            %True airspeed [m/sec]
 h_CG = 0.32;                        %Esitmated location of the center of gravity on the wing chord [unitless]
-%alpha = deg2rad(2.7);               %Steady state angle of attck [rad]
+alpha = deg2rad(2.7);               %Steady state angle of attck [rad]
 
 % Mass and Inertial Data
 
@@ -125,6 +132,17 @@ C_ndeltar = 0;%-0.074;?
 %% Standard Atmospheric Calculations
 
 [T, a, P, rho] = atmosisa(altt);
+
+%     if altt <= 36089.2                                      %For altitudes 0 - 36089.2 km
+%         tau = tau_sl + a1*altt;
+%         rho = rho_sl * (tau/tau_sl).^(-1-g/(a1*R));
+%     elseif altt > 36089.2                                   %For altitude 36089.2 - 82021 km
+%         tau_11 = tau_sl + a1*36089.2;                       %Temperature at 36089.2 km
+%         rho_11 = rho_sl * (tau_11/tau_sl).^(-1-g/(a1*R));   %Pressure at 36089.2 km
+% 
+%         tau = tau_11;
+%         rho = rho_11*exp((-g*(altt-36089.2))/(R*tau_11));
+%     end
     
 %% Nondimensional Stability Derivatives
 %From "translation" key in HW3

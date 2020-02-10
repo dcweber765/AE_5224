@@ -2,7 +2,7 @@
 
 clear all; clear all;
 %% Constants needed for calculations (In Imperial units)
-% g = 32.2;                           %Gravitational acceleration [ft/sec^2]
+g = 9.8;                           %Gravitational acceleration [ft/sec^2]
 % R = 3089.2;                         %Specific gas constant for dry air [lb*ft/sl*K]
 % a1 = -1.9812*10^-3;                 %Temperature gradient [K/ft]
 % rho_sl = 0.0023769;                 %Density at sea level [sl/ft^3]
@@ -48,29 +48,29 @@ C_mT1 = 0;
 
 % Stability Derivatives
 C_D0 = 0.03;
-C_Du = 0.104;?
+C_Du = 0;%0.104;?
 C_Dalpha = 0.3;
-C_Txu = -0.07;?
+C_Txu = 0;%-0.07;?
 C_L0 = 0.28;
-C_Lu = 0.4;?
+C_Lu = 0;%0.4;?
 C_Lalpha = 3.45;
-C_Lalpha_dot = 2.2;?
+C_Lalpha_dot = 0;%2.2;?
 C_Lq = 0;
 C_m0 = -0.02338;
-C_mu = 0.05;?
+C_mu = 0;%0.05;?
 C_malpha = -0.38;
-C_malpha_dot = -6.7;?
+C_malpha_dot = 0;%-6.7;?
 C_mq = -3.6;
-C_mTu = -0.003;?
-C_mTalpha = 0;?
+C_mTu =0;% -0.003;?
+C_mTalpha = 0;%?
 
 % Control Derivatives
 C_Ddeltae = 0;
 C_Dih = 0;%?
 C_Ldeltae = -0.36;
-C_Lih = 0.94;%?
+C_Lih = 0;%0.94;%?
 C_mdeltae = -0.5;
-C_mih = -2.5;?
+C_mih = 0;% -2.5;?
 
 %% Lateral Directional Aerodynamic Coefficients
 % Stability Derivatives
@@ -81,7 +81,7 @@ C_Ybeta = -0.98;
 C_Yp = 0;
 C_Yr = 0;
 C_nbeta = 0.25;
-C_nTbeta = 0;?
+C_nTbeta = 0;%?
 C_np = 0.022;
 C_nr = -0.35;
 
@@ -91,7 +91,7 @@ C_ldeltar = 0.105;
 C_Ydeltaa = 0;
 C_Ydeltar = -0.17;
 C_ndeltaa = 0.06;
-C_ndeltar = -0.074;?
+C_ndeltar = 0;%-0.074;?
 %% Standard Atmospheric Calculations
 
 [T, a, P, rho] = atmosisa(altt);

@@ -3,9 +3,9 @@
 clear all; clear all;
 
 %% STATE
-      x = 0;
-      y = 0;
-      z = 0;
+      p_x = 0;
+      p_y = 0;
+      p_z = 0;
       u_t = 0;
       v_t = 0;
       w_t = 0;
@@ -22,7 +22,7 @@ clear all; clear all;
       q = 0;
       r = 0;
       
-p_t = [x;y;z];
+p_t = [p_x;p_y;p_z];
 V_t = [u_t;v_t;w_t];
 V_b = [u_b;v_b;w_b];
 euler_ang = [psi;theta;phi];
@@ -261,5 +261,51 @@ B_lat = [Y_deltaa/m                              Y_deltar/m;
          (L_deltaa/Ix_prime)+Izx_prime*N_deltaa  (L_deltar/Ix_prime)+Izx_prime*N_deltar;
          (N_deltaa/Iz_prime)+Izx_prime*L_deltaa  (N_deltar/Iz_prime)+Izx_prime*L_deltar;
          0                                       0]
+
      
+f_p_x = .5*rho*S_prop*C_prop*((k_motor*del_t)^2 - V_a^2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Inputs
+% del_a
+% del_p
+% del_r_r
+% del_r_l
+
+[el_rud] = [1 1; -1 1]*[del_r_r; del_r_l];
+
+del_e = el_rud(1);
+del_r = el_rud(2);
+
+X_long = [p_x;
+          p_z;
+          u_t;
+          w_t;
+          theta;
+          q];
+
+      
+X_lat = [p_y;
+         v_t;
+         psi;
+         phi;
+         p;
+         r];
+     
+U_long = [del_e;
+          del_p];
+
+U_lat = [del_a;
+         del_r];
+     
+X_dot_long = A_long*X_long + B_long*U_long
+
+X_dot_lat = A_lat*X_lat + B_lat*U_lat
+
+
+
+f = [-m*g*sin(theta);
+     m*g*cos(theta)*sin(phi);
+     m*g*cos(theta)*cos(phi);] + 
+     
+

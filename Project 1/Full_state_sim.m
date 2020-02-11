@@ -31,7 +31,7 @@ omega_tb_b = [p;q;r];
 X = [p_t;
     V_t;
     V_b;
-    V_a;X
+    V_a;
     alpha;
     beta;
     euler_ang;
@@ -46,10 +46,21 @@ b = 2.8956;                             %Wing span [m]
 % Flight Conditions Data
 g = 9.8;
 altt = 100;                       %Altitude [m]
-%Mach = 0.7;                         %Mach of the aircraft [unitless]
+Mach = 0.1;                         %Mach of the aircraft [unitless]
 V = 30;                            %True airspeed [m/sec]
 h_CG = 0.32;                        %Esitmated location of the center of gravity on the wing chord [unitless]
 %alpha = deg2rad(2.7);               %Steady state angle of attck [rad]
+
+%% Trim
+
+V_a0 = 30;
+alpha0 = 0;
+delta_e0 = deg2rad(4);
+delta_t0 = 0;
+
+w0 = 0;
+q0 = 0;
+
 
 % Mass and Inertial Data
 
@@ -68,6 +79,12 @@ Izx_prime = Jzx/(Jx*Jz-Jxz^2);
 % Steady level trim
 u0 = V;                             %Initial velocity [ft/sec]
 theta0 = deg2rad(0);                %Initial pitch angle [rad]
+
+%% Prop properties
+S_prop = 0.2027;
+k_motor = 80;
+C_prop = 1;
+
 %% Longitudinal Aerodynamic Coefficients
 % Steady State
 C_L1 = 0.41;
@@ -78,26 +95,23 @@ C_mT1 = 0;
 
 % Stability Derivatives
 C_D0 = 0.03;
-C_Du = 0;%0.104;?
-C_Dalpha = 0.3;
-C_Txu = 0;%-0.07;?
+C_D_alpha = 0.3;
+C_D_q = 0;
 C_L0 = 0.28;
-C_Lu = 0;%0.4;?
-C_Lalpha = 3.45;
-C_Lalpha_dot = 0;%2.2;?
-C_Lq = 0;
+C_L_alpha = 3.45;
+C_L_q = 0;
 C_m0 = -0.02338;
 C_mu = 0;%0.05;?
-C_malpha = -0.38;
-C_malpha_dot = 0;%-6.7;?
+C_m_alpha = -0.38;
+
 C_m_q = -3.6;
-C_mTu =0;% -0.003;?
-C_mTalpha = 0;%?
+
+
 
 % Control Derivatives
-C_Ddeltae = 0;
+C_D_delta_e = 0;
 C_Dih = 0;%?
-C_Ldeltae = -0.36;
+C_L_delta_e = -0.36;
 C_Lih = 0;%0.94;%?
 C_m_delta_e = -0.5;
 C_mih = 0;% -2.5;?
@@ -128,34 +142,40 @@ C_ndeltar = 0;%-0.074;?
     
 %% Nondimensional Stability Derivatives
 %From "translation" key in HW3
-C_xu = -(C_Du+2*C_D1);
-C_X_alpha = -(C_Dalpha-C_L1);
-C_xalpha_dot = 0;
-C_xq = 0;
-C_X_delta_e = -C_Ddeltae;
+%C_xu = -(C_Du+2*C_D1);
+C_X_0 = -C_D0*cos(alpha0) + C_L0*sin(alpha0);
+C_X_alpha = -C_D_alpha*cos(alpha0) + C_L_alpha*sin(alpha0);
+%C_xalpha_dot = 0;
+C_X_q = -C_D_q*cos(alpha0) + C_L_q*sin(alpha0);
+C_X_delta_e = -C_D_delta_e*cos(alpha0) + C_L_delta_e*sin(alpha0);
 %C_X_deltat = C_Txu+2*C_Tx1;
 
-C_Z_u = -(C_Lu+2*C_L1);
-C_Z_alpha = -(C_Lalpha+C_D1);
-%C_zalpha_dot = -C_Lalpha_dot;
-C_Z_q = -C_Lq;
-C_Z_delta_e = -C_Ldeltae;
-%C_zdeltap = 0;
+% C_Z_u = -(C_Lu+2*C_L1);
+% C_Z_alpha = -(C_Lalpha+C_D1);
+% C_zalpha_dot = -C_Lalpha_dot;
+% C_Z_q = -C_Lq;
+% C_Z_delta_e = -C_Ldeltae;
+% C_zdeltap = 0;
 
-C_mu = C_mu+2*C_m1;
-C_m_alpha = C_malpha;
+C_Z_0 = -C_D0*sin(alpha0) + C_L0*cos(alpha0);
+C_Z_alpha = -C_D_alpha*sin(alpha0) + C_L_alpha*cos(alpha0);
+C_Z_q = -C_D_q*sin(alpha0) + C_L_q*cos(alpha0);
+C_Z_delta_e = -C_D_delta_e*sin(alpha0) + C_L_delta_e*cos(alpha0);
+
+%C_mu = C_mu+2*C_m1;
+%C_m_alpha = C_malpha;
 %C_malpha_dot = C_malpha_dot;
-C_m_q = C_m_q;
-C_m_delta_e = C_m_delta_e;
+%C_m_q = C_m_q;
+%C_m_delta_e = C_m_delta_e;
 %C_mdeltap = C_mTu+2*C_mT1;
 
 % Nondimensional
-C_w0 = w/(1/2*rho*u0^2*S);          %Non-dimensional weight [unitless]
+%C_w0 = w/(1/2*rho*u0^2*S);          %Non-dimensional weight [unitless]
 
 % Longitudinal Dimensional Derivatives
 Xu = (u0*rho*S)/m * (C_X_0 + C_X_alpha*alpha0 + C_X_delta_e*delta_e0) - (rho*S*w0*C_X_alpha)/2*m + (rho*S*c_bar*C_X_q*u0*q0)/4*m*V_a0 - (rho*S_prop*C_prop*u0)/m;
 Xw = -q0 + (w0*rho*S)/m * (C_X_0 + C_X_alpha*alpha0 + C_X_delta_e*delta_e0) + (rho*S*c_bar*C_X_q*w0*q0)/4*m*V_a0 + (rho*S*u0*C_X_alpha)/2*m - (rho*S_prop*C_prop*w0)/m;
-Xq = -w0 + (rho*V_a0*c_bar*S*C_xq)/4*m;
+Xq = -w0 + (rho*V_a0*c_bar*S*C_X_q)/4*m;
 %Xw_dot = 1/4*rho*c_bar*S*C_xalpha_dot;
 
 Zu = q0 + (u0*rho*S)/m * (C_Z_0 + C_Z_alpha*alpha0 + C_Z_delta_e*delta_e0) - (rho*S*w0*C_Z_alpha)/2*m + (rho*S*c_bar*C_Z_q*u0*q0)/4*m*V_a0;
@@ -163,8 +183,8 @@ Zw = (w0*rho*S)/m * (C_Z_0 + C_Z_alpha*alpha0 + C_Z_delta_e*delta_e0) - (rho*S*u
 Zq = u0 + (rho*V_a0*S*C_Z_q*q0)/4*m;
 %Zw_dot = 1/4*rho*c_bar*S*C_zalpha_dot;
 
-Mu = ((u0*rho*S*c_bar)/Jy)*(C_m_0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) - (rho*S*c_bar*C_m_alpha*u0)/2*Jy + (rho*S*c_bar^2 *q0*u0)/(4*Jy*V_a0);
-Mw = ((w0*rho*S*c_bar)/Jy)*(C_m_0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) + (rho*S*c_bar*C_m_alpha*u0)/2*Jy + (rho*S*c_bar^2 *q0*u0)/(4*Jy*V_a0);
+Mu = ((u0*rho*S*c_bar)/Jy)*(C_m0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) - (rho*S*c_bar*C_m_alpha*u0)/2*Jy + (rho*S*c_bar^2 *q0*u0)/(4*Jy*V_a0);
+Mw = ((w0*rho*S*c_bar)/Jy)*(C_m0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) + (rho*S*c_bar*C_m_alpha*u0)/2*Jy + (rho*S*c_bar^2 *q0*u0)/(4*Jy*V_a0);
 Mq = (1/4*rho*V_a0*c_bar^2*S*C_m_q)/Jy;
 %Mw_dot = 1/4*rho*c_bar^2*S*C_malpha_dot;
 
@@ -184,7 +204,7 @@ Nr = 1/4*rho*u0*b^2*S*C_nr;
 %% Dimensional Control Derivatives
 %Longitudinal Dimensional Control Derivatives
 X_deltae = (C_X_delta_e*1/2*rho*V_a^2*S)/m;
-X_deltat = (rho*S_prop*C_prop*k^2*delta_t0)/m;
+X_deltat = (rho*S_prop*C_prop*k_motor^2*delta_t0)/m;
 
 Z_deltae = (C_Z_delta_e*1/2*rho*V_a0^2*S)/m;
 %Z_deltap = C_zdeltap*1/2*rho*u0^2*S;
@@ -230,7 +250,7 @@ Long4_5A = 0;
 Long5_1A = sin(theta0);
 Long5_2A = -cos(theta0);
 Long5_3A = 0;
-Long5_4A = u0*cos(theta0)+w0sin(theta0);
+Long5_4A = u0*cos(theta0)+w0*sin(theta0);
 Long5_5A = 0;
 
 
@@ -275,7 +295,7 @@ B_lat = [Y_deltaa/m                              Y_deltar/m;
          0                                       0]
 
      
-f_p_x = .5*rho*S_prop*C_prop*((k_motor*del_t)^2 - V_a^2);
+%f_p_x = .5*rho*S_prop*C_prop*((k_motor*del_t)^2 - V_a^2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Inputs
@@ -284,40 +304,40 @@ f_p_x = .5*rho*S_prop*C_prop*((k_motor*del_t)^2 - V_a^2);
 % del_r_r
 % del_r_l
 
-[el_rud] = [1 1; -1 1]*[del_r_r; del_r_l];
-
-del_e = el_rud(1);
-del_r = el_rud(2);
-
-X_long = [p_x;
-          p_z;
-          u_t;
-          w_t;
-          theta;
-          q];
-
-      
-X_lat = [p_y;
-         v_t;
-         psi;
-         phi;
-         p;
-         r];
-     
-U_long = [del_e;
-          del_p];
-
-U_lat = [del_a;
-         del_r];
-     
-X_dot_long = A_long*X_long + B_long*U_long
-
-X_dot_lat = A_lat*X_lat + B_lat*U_lat
-
-
-
-f = [-m*g*sin(theta);
-     m*g*cos(theta)*sin(phi);
-     m*g*cos(theta)*cos(phi);] + 
-     
-
+% [el_rud] = [1 1; -1 1]*[del_r_r; del_r_l];
+% 
+% del_e = el_rud(1);
+% del_r = el_rud(2);
+% 
+% X_long = [p_x;
+%           p_z;
+%           u_t;
+%           w_t;
+%           theta;
+%           q];
+% 
+%       
+% X_lat = [p_y;
+%          v_t;
+%          psi;
+%          phi;
+%          p;
+%          r];
+%      
+% U_long = [del_e;
+%           del_p];
+% 
+% U_lat = [del_a;
+%          del_r];
+%      
+% X_dot_long = A_long*X_long + B_long*U_long
+% 
+% X_dot_lat = A_lat*X_lat + B_lat*U_lat
+% 
+% 
+% 
+% f = [-m*g*sin(theta);
+%      m*g*cos(theta)*sin(phi);
+%      m*g*cos(theta)*cos(phi);]
+%      
+% 

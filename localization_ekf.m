@@ -48,6 +48,8 @@ std_dev_gyro= 0.13*pi/180;					% Rate gyro std. dev. (rad/s)
 std_dev_airspeed= 0.002;                    % Airspeed sensor std. dev (kPa)
 std_dev_accel= 0.0025*9.81;                 % Accelerometer std. dev (m/s^2)
 std_dev_gps= 0.21*9.009e-6;                 % GPS std. dev (deg)
+std_dev_gps_alt= 0.4*9.009e-6;              % GPS std. dev for altitude (deg)
+std_dev_gps_vel= 0.05;                      % GPS velocity std. dev (m/s)
 bias_mag	= 1*pi/180 * randn(3, 1);       % Magnetometer bias (rad)
 bias_gyro	= 1*pi/180 * randn(3, 1);       % Rate gyro bias (rad/s)
 bias_airspeed= 0.020;                       % Airspeed sensor bias (kPa)
@@ -143,32 +145,57 @@ end
 
 %% "Streaming" extended Kalman filter estimates of Euler angles and biases
 
-R_me_covariance		= blkdiag((std_dev_gps)*eye(3),(std_dev_airspeed^2)*eye(3),(std_dev_mag^2) * eye(3));								% Measurement error covariance (3x3 matrix)
-P_ee_covariance     = blkdiag(R_me_covariance);						% I_6 is for biases
+R_me_covariance		= blkdiag((std_dev_gps^2)*eye(2), (std_dev_gps_alt^2),(std_dev_gps_vel^2)*eye(3),(std_dev_mag^2) * eye(3));								% Measurement error covariance (3x3 matrix)
+P_ee_covariance     = R_me_covariance;						
 
 % Initial estimate same as direct measurement; zero initial estimate of all biases
-x_e_hat	= [z_euler_angles_noisy(:, 1); zeros(6, 1)];
+x_e_hat	= [z_gps_pos(:,1); z_gps_velocity(:,1); z_euler_angles_noisy(:, 1); zeros(9, 1)];
 
-euler_angles_ekf_est	= zeros(3, n_pts);
-biases_e_ekf_est		= zeros(6, n_pts);		% (three magnetometer, three rate gyro) biases
-trace_P_rec				= zeros(1, n_pts);
-
-euler_angles_ekf_est(:, 1)	= x_e_hat(1:3);
-biases_e_ekf_est(:, 1)		= zeros(6, 1);		% (three magnetometer, three rate gyro) biases
-trace_P_rec(1)				= trace(P_ee_covariance); 
+% euler_angles_ekf_est	= zeros(3, n_pts);
+% biases_e_ekf_est		= zeros(6, n_pts);		% (three magnetometer, three rate gyro) biases
+% trace_P_rec				= zeros(1, n_pts);
+% 
+% euler_angles_ekf_est(:, 1)	= x_e_hat(1:3);
+% biases_e_ekf_est(:, 1)		= zeros(6, 1);		% (three magnetometer, three rate gyro) biases
+% trace_P_rec(1)				= trace(P_ee_covariance); 
 
 for m1 = 2:n_pts
     dt = time_pts(m1) - time_pts(m1 - 1);
 	
-	% Physics-based predictive model    
-	e_thta	= x_e_hat(2);
-	e_phi	= x_e_hat(3);
+	% Physics-based predictive model 
+    a_x = z_accel_noisy(1);
+    a_y = z_accel_noisy(2);
+    a_z = z_accel_noisy(3);
+    z_p = z_rate_gyro_noisy(1);
+    z_q = z_rate_gyro_noisy(2);
+    z_r = z_rate_gyro_noisy(3);
+    e_psi   = x_e_hat(7);
+	e_thta	= x_e_hat(8);
+	e_phi	= x_e_hat(9);
     Hinv	= (1 / cos(e_thta) ) * [0 sin(e_phi) cos(e_phi); ...
 		0 cos(e_phi)*cos(e_thta) -sin(e_phi)*cos(e_thta); ...
 		cos(e_thta) sin(e_phi)*sin(e_thta) cos(e_phi)*sin(e_thta)];
+    
+    R_t_b = [cos(e_psi)*cos(e_thta) cos(e_thta)*sin(e_psi) -sin(e_thta);...
+        cos(e_psi)*sin(e_phi)*sin(e_thta)-cos(e_phi)*sin(e_psi) cos(e_phi)*cos(e_psi)+sin(e_phi)*sin(e_psi)*sin(e_thta) cos(e_thta)*sin(e_phi);...
+        sin(e_phi)*sin(e_psi)+cos(e_phi)*cos(e_psi)*sin(e_thta) cos(e_phi)*sin(e_psi)*sin(e_thta)-cos(e_psi)*sin(e_phi) cos(e_phi)*cos(e_thta)];
+    
+    Jac_Hinv = [0 z_q*sin(e_phi)*sin(e_thta)/(cos(e_thta)^2)+z_r*cos(e_phi)*sin(e_thta)/(cos(e_thta)^2) z_q*cos(e_phi)/cos(e_thta)-z_r*sin(e_phi)/cos(e_thta);...
+        0 0 -z_q*sin(e_phi)-z_r*cos(e_phi);...
+        0 z_q*sin(e_phi)/(cos(e_thta)^2)+z_r*cos(e_phi)/(cos(e_thta)^2) z_q*cos(e_phi)*tan(e_thta)-z_r*sin(e_phi)*tan(e_thta)];
+    
+    Jac_Rtb = [-a_x*sin(e_psi)*cos(e_thta)+a_y*cos(e_thta)*cos(e_psi) -a_x*cos(e_psi)*sin(e_thta)-a_y*sin(e_thta)*sin(e_psi)-a_z*cos(e_thta) 0;...
+        a_x*(-sin(e_psi)*sin(e_phi)*sin(e_thta)-cos(e_phi)*cos(e_psi))+a_y*(sin(e_phi)*cos(e_psi)*sin(e_thta)-cos(e_phi)*sin(e_psi)) a_x*cos(e_psi)*sin(e_phi)*cos(e_thta)+a_y*sin(e_phi)*sin(e_psi)*cos(e_thta)-a_z*sin(e_phi)*sin(e_thta) a_x*(cos(e_psi)*cos(e_phi)*sin(e_thta)+sin(e_phi)*sin(e_psi))+a_y*(cos(e_phi)*sin(e_psi)*sin(e_thta)-sin(e_phi)*cos(e_psi))+a_z*cos(e_thta)*cos(e_phi);...
+        a_x*(sin(e_phi)*cos(e_psi)-cos(e_phi)*sin(e_psi)*sin(e_thta))+a_y*(cos(e_phi)*cos(e_psi)*sin(e_thta)+sin(e_psi)*sin(e_phi)) a_x*cos(e_phi)*cos(e_psi)*cos(e_thta)+a_y*cos(e_phi)*sin(e_psi)*cos(e_thta)-a_z*cos(e_phi)*sin(e_thta) a_x*(cos(e_phi)*sin(e_psi)-sin(e_phi)*cos(e_psi)*sin(e_thta))+a_y*(-sin(e_phi)*sin(e_psi)*sin(e_thta)-cos(e_psi)*cos(e_phi))-a_z*sin(e_phi)*cos(e_thta)];
 	
-	A_e	= [eye(3) eye(3)*dt zeros(3); zeros(3) eye(3)-2*z_rate_gyro_noisy zeros(3); zeros(3,6) eye(3)];
-	B_e	= [zeros(3, 12); R_e_t zeros(3) eye(3) zeros(3); zeros(3) Hinv zeros(3) -Hinv*R_t_e];
+	A_e	= [zeros(3) eye(3) zeros(3,12);...
+        zeros(3) zeros(3) Jac_Rtb zeros(3) -R_t_b zeros(3);...
+        zeros(3) zeros(3) Jac_Hinv zeros(3,6) -Hinv;...
+        zeros(9,18)];
+	B_e	= [zeros(3,6);...
+        -R_t_b zeros(3);...
+        zeros(3) -Hinv;...
+        zeros(9,6)];
 	Q_pn_covariance = B_e * (blkdiag((std_dev_accel^2)*eye(3),(std_dev_gyro^2) * eye(3), 0*eye(3))) * B_e';
 	
 	zm	= z_euler_angles_noisy(:, m1);	% New magnetometer measurements
@@ -184,7 +211,7 @@ for m1 = 2:n_pts
 	x_e_minus	= x_e_hat + [ ...
 		((1/6)*k1 + (1/3)*k2 + (1/3)*k3 + (1/6)*k4); zeros(6,1)];			% The predictive state update can use nonlinear kinematic equations
 
-    P_minus= A_e*P_ee_covariance*A_e' + Q_pn_covariance;					% The e.e. covariance update uses linearized A...
+    P_minus= (eye(18) + A_e)*P_ee_covariance*(eye(18) + A_e)' + Q_pn_covariance*dt;					% The e.e. covariance update uses linearized A...
 	
 	% Measurement model
     C_e	= eye(9);		% For Euler angles
@@ -206,81 +233,81 @@ for m1 = 2:n_pts
 end
 
 
-figsize = [0, 0.04, 0.8, 0.7];
-figure('Units', 'Normalized', 'InnerPosition', figsize, 'OuterPosition', figsize);
-
-subplot(321); plot(time_pts, pqr_true(1,:)*180/pi, 'LineWidth', 2); hold on;
-subplot(321); plot(time_pts, z_rate_gyro_noisy(1,:)*180/pi, 'LineWidth', 1); hold on;
-xlabel('Time (s)'); ylabel('\omega_{tb}^{b} (deg/s)'); grid on;
-set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
-
-subplot(323); plot(time_pts, pqr_true(2,:)*180/pi, 'LineWidth', 2); hold on;
-subplot(323); plot(time_pts, z_rate_gyro_noisy(2,:)*180/pi, 'LineWidth', 1); hold on;
-xlabel('Time (s)'); ylabel('\omega_{tb}^{b} (deg/s)');  grid on;
-set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
-
-subplot(325); plot(time_pts, pqr_true(3,:)*180/pi, 'LineWidth', 2); hold on;
-subplot(325); plot(time_pts, z_rate_gyro_noisy(3,:)*180/pi, 'LineWidth', 1); hold on;
-xlabel('Time (s)'); ylabel('\omega_{tb}^{b} (deg/s)');  grid on;
-set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
-
-subplot(322); plot(time_pts, euler_angles_true(1,:)*180/pi, 'LineWidth', 2); hold on;
-subplot(322); plot(time_pts, z_euler_angles_noisy(1,:)*180/pi, 'LineWidth', 1); hold on;
-xlabel('Time (s)'); ylabel('z_{\psi} (deg)'); grid on;
-set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
-
-subplot(324); plot(time_pts, euler_angles_true(2,:)*180/pi, 'LineWidth', 2); hold on;
-subplot(324); plot(time_pts, z_euler_angles_noisy(2,:)*180/pi, 'LineWidth', 1); hold on;
-xlabel('Time (s)'); ylabel('z_{\theta} (deg)');  grid on;
-set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
-
-subplot(326); plot(time_pts, euler_angles_true(3,:)*180/pi, 'LineWidth', 2); hold on;
-subplot(326); plot(time_pts, z_euler_angles_noisy(3,:)*180/pi, 'LineWidth', 1); hold on;
-xlabel('Time (s)'); ylabel('z_{\phi} (deg)');  grid on;
-set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
-
-print -dpng attitude_ekf_data_constbias.png
-
-
-
-figsize = [0, 0.04, 0.5, 0.5];
-figure('Units', 'Normalized', 'InnerPosition', figsize, 'OuterPosition', figsize);
-plot(time_pts, trace_P_rec, 'LineWidth', 2); grid on;
-xlabel('Time (s)'); ylabel('tr(P)');
-set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
-print -dpng attitude_ekf_traceP_constbias.png
-
-
-figure('Units', 'Normalized', 'InnerPosition', figsize, 'OuterPosition', figsize);
-
-subplot(311); plot(time_pts, euler_angles_int_from_true(1,:)*180/pi, 'LineWidth', 2); hold on;
-subplot(311); plot(time_pts, euler_angles_int_from_noisy(1,:)*180/pi, 'LineWidth', 1); 
-subplot(311); plot(time_pts, euler_angles_ekf_est(1,:)*180/pi, '--', 'LineWidth', 2); 
-xlabel('Time (s)'); ylabel('\psi (deg)'); grid on;
-set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
-
-subplot(312); plot(time_pts, euler_angles_int_from_true(2,:)*180/pi, 'LineWidth', 2); hold on;
-subplot(312); plot(time_pts, euler_angles_int_from_noisy(2,:)*180/pi, 'LineWidth', 1);
-subplot(312); plot(time_pts, euler_angles_ekf_est(2,:)*180/pi, '--', 'LineWidth', 2); 
-xlabel('Time (s)'); ylabel('\theta (deg)');  grid on;
-set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
-
-subplot(313); plot(time_pts, euler_angles_int_from_true(3,:)*180/pi, 'LineWidth', 2); hold on;
-subplot(313); plot(time_pts, euler_angles_int_from_noisy(3,:)*180/pi, 'LineWidth', 1);
-subplot(313); plot(time_pts, euler_angles_ekf_est(3,:)*180/pi, '--', 'LineWidth', 2); 
-xlabel('Time (s)'); ylabel('\phi (deg)');  grid on;
-set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
-
-print -dpng attitude_ekf_euler_constbias.png
-
-figure('Units', 'Normalized', 'InnerPosition', figsize, 'OuterPosition', figsize);
-for m1 = 1:6
-	subplot(2, 3, m1);
-	plot(time_pts, biases_e_ekf_est(m1, :)*180/pi, 'LineWidth', 2);
-	set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
-	hold on; grid on;
-end
-print -dpng attitude_ekf_est_bias.png
+% figsize = [0, 0.04, 0.8, 0.7];
+% figure('Units', 'Normalized', 'InnerPosition', figsize, 'OuterPosition', figsize);
+% 
+% subplot(321); plot(time_pts, pqr_true(1,:)*180/pi, 'LineWidth', 2); hold on;
+% subplot(321); plot(time_pts, z_rate_gyro_noisy(1,:)*180/pi, 'LineWidth', 1); hold on;
+% xlabel('Time (s)'); ylabel('\omega_{tb}^{b} (deg/s)'); grid on;
+% set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+% 
+% subplot(323); plot(time_pts, pqr_true(2,:)*180/pi, 'LineWidth', 2); hold on;
+% subplot(323); plot(time_pts, z_rate_gyro_noisy(2,:)*180/pi, 'LineWidth', 1); hold on;
+% xlabel('Time (s)'); ylabel('\omega_{tb}^{b} (deg/s)');  grid on;
+% set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+% 
+% subplot(325); plot(time_pts, pqr_true(3,:)*180/pi, 'LineWidth', 2); hold on;
+% subplot(325); plot(time_pts, z_rate_gyro_noisy(3,:)*180/pi, 'LineWidth', 1); hold on;
+% xlabel('Time (s)'); ylabel('\omega_{tb}^{b} (deg/s)');  grid on;
+% set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+% 
+% subplot(322); plot(time_pts, euler_angles_true(1,:)*180/pi, 'LineWidth', 2); hold on;
+% subplot(322); plot(time_pts, z_euler_angles_noisy(1,:)*180/pi, 'LineWidth', 1); hold on;
+% xlabel('Time (s)'); ylabel('z_{\psi} (deg)'); grid on;
+% set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+% 
+% subplot(324); plot(time_pts, euler_angles_true(2,:)*180/pi, 'LineWidth', 2); hold on;
+% subplot(324); plot(time_pts, z_euler_angles_noisy(2,:)*180/pi, 'LineWidth', 1); hold on;
+% xlabel('Time (s)'); ylabel('z_{\theta} (deg)');  grid on;
+% set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+% 
+% subplot(326); plot(time_pts, euler_angles_true(3,:)*180/pi, 'LineWidth', 2); hold on;
+% subplot(326); plot(time_pts, z_euler_angles_noisy(3,:)*180/pi, 'LineWidth', 1); hold on;
+% xlabel('Time (s)'); ylabel('z_{\phi} (deg)');  grid on;
+% set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+% 
+% print -dpng attitude_ekf_data_constbias.png
+% 
+% 
+% 
+% figsize = [0, 0.04, 0.5, 0.5];
+% figure('Units', 'Normalized', 'InnerPosition', figsize, 'OuterPosition', figsize);
+% plot(time_pts, trace_P_rec, 'LineWidth', 2); grid on;
+% xlabel('Time (s)'); ylabel('tr(P)');
+% set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+% print -dpng attitude_ekf_traceP_constbias.png
+% 
+% 
+% figure('Units', 'Normalized', 'InnerPosition', figsize, 'OuterPosition', figsize);
+% 
+% subplot(311); plot(time_pts, euler_angles_int_from_true(1,:)*180/pi, 'LineWidth', 2); hold on;
+% subplot(311); plot(time_pts, euler_angles_int_from_noisy(1,:)*180/pi, 'LineWidth', 1); 
+% subplot(311); plot(time_pts, euler_angles_ekf_est(1,:)*180/pi, '--', 'LineWidth', 2); 
+% xlabel('Time (s)'); ylabel('\psi (deg)'); grid on;
+% set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+% 
+% subplot(312); plot(time_pts, euler_angles_int_from_true(2,:)*180/pi, 'LineWidth', 2); hold on;
+% subplot(312); plot(time_pts, euler_angles_int_from_noisy(2,:)*180/pi, 'LineWidth', 1);
+% subplot(312); plot(time_pts, euler_angles_ekf_est(2,:)*180/pi, '--', 'LineWidth', 2); 
+% xlabel('Time (s)'); ylabel('\theta (deg)');  grid on;
+% set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+% 
+% subplot(313); plot(time_pts, euler_angles_int_from_true(3,:)*180/pi, 'LineWidth', 2); hold on;
+% subplot(313); plot(time_pts, euler_angles_int_from_noisy(3,:)*180/pi, 'LineWidth', 1);
+% subplot(313); plot(time_pts, euler_angles_ekf_est(3,:)*180/pi, '--', 'LineWidth', 2); 
+% xlabel('Time (s)'); ylabel('\phi (deg)');  grid on;
+% set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+% 
+% print -dpng attitude_ekf_euler_constbias.png
+% 
+% figure('Units', 'Normalized', 'InnerPosition', figsize, 'OuterPosition', figsize);
+% for m1 = 1:6
+% 	subplot(2, 3, m1);
+% 	plot(time_pts, biases_e_ekf_est(m1, :)*180/pi, 'LineWidth', 2);
+% 	set(gca, 'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'bold');
+% 	hold on; grid on;
+% end
+% print -dpng attitude_ekf_est_bias.png
 
 % figsize = [0, 0.04, 0.5, 0.7];
 % figure('Units', 'Normalized', 'InnerPosition', figsize, 'OuterPosition', figsize);

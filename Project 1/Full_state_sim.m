@@ -90,7 +90,7 @@ C_m0 = -0.02338;
 C_mu = 0;%0.05;?
 C_malpha = -0.38;
 C_malpha_dot = 0;%-6.7;?
-C_mq = -3.6;
+C_m_q = -3.6;
 C_mTu =0;% -0.003;?
 C_mTalpha = 0;%?
 
@@ -99,7 +99,7 @@ C_Ddeltae = 0;
 C_Dih = 0;%?
 C_Ldeltae = -0.36;
 C_Lih = 0;%0.94;%?
-C_mdeltae = -0.5;
+C_m_delta_e = -0.5;
 C_mih = 0;% -2.5;?
 
 %% Lateral Directional Aerodynamic Coefficients
@@ -129,44 +129,44 @@ C_ndeltar = 0;%-0.074;?
 %% Nondimensional Stability Derivatives
 %From "translation" key in HW3
 C_xu = -(C_Du+2*C_D1);
-C_xalpha = -(C_Dalpha-C_L1);
+C_X_alpha = -(C_Dalpha-C_L1);
 C_xalpha_dot = 0;
 C_xq = 0;
-C_xdeltae = -C_Ddeltae;
-C_xdeltap = C_Txu+2*C_Tx1;
+C_X_delta_e = -C_Ddeltae;
+%C_X_deltat = C_Txu+2*C_Tx1;
 
-C_zu = -(C_Lu+2*C_L1);
-C_zalpha = -(C_Lalpha+C_D1);
-C_zalpha_dot = -C_Lalpha_dot;
-C_zq = -C_Lq;
-C_zdeltae = -C_Ldeltae;
-C_zdeltap = 0;
+C_Z_u = -(C_Lu+2*C_L1);
+C_Z_alpha = -(C_Lalpha+C_D1);
+%C_zalpha_dot = -C_Lalpha_dot;
+C_Z_q = -C_Lq;
+C_Z_delta_e = -C_Ldeltae;
+%C_zdeltap = 0;
 
 C_mu = C_mu+2*C_m1;
-C_malpha = C_malpha;
-C_malpha_dot = C_malpha_dot;
-C_mq = C_mq;
-C_mdeltae = C_mdeltae;
-C_mdeltap = C_mTu+2*C_mT1;
+C_m_alpha = C_malpha;
+%C_malpha_dot = C_malpha_dot;
+C_m_q = C_m_q;
+C_m_delta_e = C_m_delta_e;
+%C_mdeltap = C_mTu+2*C_mT1;
 
 % Nondimensional
 C_w0 = w/(1/2*rho*u0^2*S);          %Non-dimensional weight [unitless]
 
 % Longitudinal Dimensional Derivatives
-Xu = rho*u0*S*C_w0*sin(theta0)+1/2*rho*u0*S*C_xu;
-Xw = 1/2*rho*u0*S*C_xalpha;
-Xq = 1/4*rho*u0*c_bar*S*C_xq;
-Xw_dot = 1/4*rho*c_bar*S*C_xalpha_dot;
+Xu = (u0*rho*S)/m * (C_X_0 + C_X_alpha*alpha0 + C_X_delta_e*delta_e0) - (rho*S*w0*C_X_alpha)/2*m + (rho*S*c_bar*C_X_q*u0*q0)/4*m*V_a0 - (rho*S_prop*C_prop*u0)/m;
+Xw = -q0 + (w0*rho*S)/m * (C_X_0 + C_X_alpha*alpha0 + C_X_delta_e*delta_e0) + (rho*S*c_bar*C_X_q*w0*q0)/4*m*V_a0 + (rho*S*u0*C_X_alpha)/2*m - (rho*S_prop*C_prop*w0)/m;
+Xq = -w0 + (rho*V_a0*c_bar*S*C_xq)/4*m;
+%Xw_dot = 1/4*rho*c_bar*S*C_xalpha_dot;
 
-Zu = -rho*u0*S*C_w0*cos(theta0)+1/2*rho*u0*S*C_zu;
-Zw = 1/2*rho*u0*S*C_zalpha;
-Zq = 1/4*rho*u0*c_bar*S*C_zq;
-Zw_dot = 1/4*rho*c_bar*S*C_zalpha_dot;
+Zu = q0 + (u0*rho*S)/m * (C_Z_0 + C_Z_alpha*alpha0 + C_Z_delta_e*delta_e0) - (rho*S*w0*C_Z_alpha)/2*m + (rho*S*c_bar*C_Z_q*u0*q0)/4*m*V_a0;
+Zw = (w0*rho*S)/m * (C_Z_0 + C_Z_alpha*alpha0 + C_Z_delta_e*delta_e0) - (rho*S*u0*C_Z_alpha)/2*m + (rho*S*c_bar*C_Z_q*w0*q0)/4*m*V_a0;
+Zq = u0 + (rho*V_a0*S*C_Z_q*q0)/4*m;
+%Zw_dot = 1/4*rho*c_bar*S*C_zalpha_dot;
 
-Mu = 1/2*rho*u0*c_bar*S*C_mu;
-Mw = 1/2*rho*u0*c_bar*S*C_malpha;
-Mq = 1/4*rho*u0*c_bar^2*S*C_mq;
-Mw_dot = 1/4*rho*c_bar^2*S*C_malpha_dot;
+Mu = ((u0*rho*S*c_bar)/Jy)*(C_m_0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) - (rho*S*c_bar*C_m_alpha*u0)/2*Jy + (rho*S*c_bar^2 *q0*u0)/(4*Jy*V_a0);
+Mw = ((w0*rho*S*c_bar)/Jy)*(C_m_0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) + (rho*S*c_bar*C_m_alpha*u0)/2*Jy + (rho*S*c_bar^2 *q0*u0)/(4*Jy*V_a0);
+Mq = (1/4*rho*V_a0*c_bar^2*S*C_m_q)/Jy;
+%Mw_dot = 1/4*rho*c_bar^2*S*C_malpha_dot;
 
 %Lateral Dimensional Derivatives
 Yv = 1/2*rho*u0*S*C_Ybeta;
@@ -183,14 +183,14 @@ Nr = 1/4*rho*u0*b^2*S*C_nr;
 
 %% Dimensional Control Derivatives
 %Longitudinal Dimensional Control Derivatives
-X_deltae = C_xdeltae*1/2*rho*u0^2*S;
-X_deltap = C_xdeltap*1/2*rho*u0^2*S;
+X_deltae = (C_X_delta_e*1/2*rho*V_a^2*S)/m;
+X_deltat = (rho*S_prop*C_prop*k^2*delta_t0)/m;
 
-Z_deltae = C_zdeltae*1/2*rho*u0^2*S;
-Z_deltap = C_zdeltap*1/2*rho*u0^2*S;
+Z_deltae = (C_Z_delta_e*1/2*rho*V_a0^2*S)/m;
+%Z_deltap = C_zdeltap*1/2*rho*u0^2*S;
 
-M_deltae = C_mdeltae*1/2*rho*u0^2*S*c_bar;
-M_deltap = C_mdeltap*1/2*rho*u0^2*S*c_bar;
+M_deltae = (C_m_delta_e*1/2*rho*V_a0^2*S*c_bar)/Jy;
+%M_deltap = C_mdeltap*1/2*rho*u0^2*S*c_bar;
 
 %Lateral Dimensional Control Derivatives
 Y_deltaa = C_Ydeltaa*1/2*rho*u0^2*S;
@@ -206,33 +206,45 @@ N_deltar = C_ndeltar*1/2*rho*u0^2*S*b;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Problem 1 %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-Long1A = Xu/m;                                            %Row 1, Column 1
-Long2A = Xw/m;                                            %Row 1, Column 2
-Long3A = 0;                                               %Row 1, Column 3
+% [u,w,q,theta,h]'
+Long1A = Xu;                                            %Row 1, Column 1
+Long2A = Xw;                                            %Row 1, Column 2
+Long3A = Xq;                                               %Row 1, Column 3
 Long4A = -g*cos(theta0);                                  %Row 1, Column 4
-Long5A = Zu/(m-Zw_dot);                                   %Row 2, Column 1
-Long6A = Zw/(m-Zw_dot);                                   %Row 2, Column 2
-Long7A = (Zq + m*u0)/(m-Zw_dot);                          %Row 2, Column 3
-Long8A = (-m*g*sin(theta0))/(m-Zw_dot);                   %Row 2, Column 4
-Long9A = (1/Jy)*(Mu + (Mw_dot*Zu)/(m-Zw_dot));            %Row 3, Column 1
-Long10A = (1/Jy)*(Mw + (Mw_dot*Zw)/(m-Zw_dot));           %Row 3, Column 2
-Long11A = (1/Jy)*(Mq + (Mw_dot*(Zq+m*u0))/(m-Zw_dot));    %Row 3, Column 3
-Long12A = -(Mw_dot*m*g*sin(theta0))/(Jy*(m-Zw_dot));      %Row 3, Column 4
+Long1_5A = 0;
+Long5A = Zu;                                   %Row 2, Column 1
+Long6A = Zw;                                   %Row 2, Column 2
+Long7A = Zq;                          %Row 2, Column 3
+Long8A = -g*sin(theta0);                   %Row 2, Column 4
+Long2_5A = 0;
+Long9A = Mu;            %Row 3, Column 1
+Long10A = Mw;           %Row 3, Column 2
+Long11A = Mq;    %Row 3, Column 3
+Long12A = 0;      %Row 3, Column 4
+Long3_5A = 0;
 Long13A = 0;                                              %Row 4, Column 1
 Long14A = 0;                                              %Row 4, Column 2
 Long15A = 1;                                              %Row 4, Column 3
 Long16A = 0;                                              %Row 4, Column 4
+Long4_5A = 0;
+Long5_1A = sin(theta0);
+Long5_2A = -cos(theta0);
+Long5_3A = 0;
+Long5_4A = u0*cos(theta0)+w0sin(theta0);
+Long5_5A = 0;
 
-A_long = [Long1A, Long2A, Long3A, Long4A;
-          Long5A, Long6A, Long7A, Long8A;
-          Long9A, Long10A, Long11A, Long12A;
-          Long13A, Long14A, Long15A, Long16A]
+
+A_long = [Long1A, Long2A, Long3A, Long4A Long1_5A;
+          Long5A, Long6A, Long7A, Long8A Long2_5A;
+          Long9A, Long10A, Long11A, Long12A Long3_5A;
+          Long13A, Long14A, Long15A, Long16A Long4_5A;
+          Long5_1A Long5_2A Long5_3A Long5_4A Long5_5A]
       
-B_long = [X_deltae/m                                     X_deltap/m;
-          Z_deltae/(m-Zw_dot)                            Z_deltap/(m-Zw_dot);
-          M_deltae/Jy+(Mw_dot*Z_deltae)/(Jy*(m-Zw_dot))  (M_deltap/Jy)+(Mw_dot*Z_deltap)/(Jy*(m-Zw_dot))
-          0                                              0]
+B_long = [X_deltae X_deltat;
+          Z_deltae 0;
+          M_deltae 0;
+          0 0;
+          0 0;]
       
 %% Lateral Linear Model
 Lat1A = Yv/m;

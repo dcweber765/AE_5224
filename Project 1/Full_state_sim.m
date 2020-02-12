@@ -58,9 +58,18 @@ alpha0 = 0;
 delta_e0 = deg2rad(4);
 delta_t0 = 0;
 
-w0 = 0;
-q0 = 0;
 
+u0 = V;                             %Initial velocity [ft/sec]
+v0 = 0;
+w0 = 0;
+
+p0 = 0;
+q0 = 0;
+r0 = 0;
+
+psi0 = 0;
+theta0 = deg2rad(0);                %Initial pitch angle [rad]
+phi0 = 0;
 
 % Mass and Inertial Data
 
@@ -79,13 +88,11 @@ Gamma_2 = (J_z*(J_z-J_y) + J_xz^2)/Gamma;
 Gamma_3 = J_z/Gamma;
 Gamma_4 = J_xz/Gamma;
 Gamma_5 = (J_z - J_x)/J_y;
-Gamma_6 = J_xz/Jy;
+Gamma_6 = J_xz/J_y;
 Gamma_7 = (J_x*(J_x-J_y) + J_xz^2)/Gamma;
 Gamma_8 = J_x/Gamma;
 
 % Steady level trim
-u0 = V;                             %Initial velocity [ft/sec]
-theta0 = deg2rad(0);                %Initial pitch angle [rad]
 
 %% Prop properties
 S_prop = 0.2027;
@@ -104,6 +111,7 @@ C_mT1 = 0;
 C_D0 = 0.03;
 C_D_alpha = 0.3;
 C_D_q = 0;
+C_D_p = 0.0437;
 C_L0 = 0.28;
 C_L_alpha = 3.45;
 C_L_q = 0;
@@ -125,23 +133,23 @@ C_mih = 0;% -2.5;?
 
 %% Lateral Directional Aerodynamic Coefficients
 % Stability Derivatives
-C_lbeta = -0.12;
-C_lp = -0.26;
-C_lr = 0.14;
-C_Ybeta = -0.98;
-C_Yp = 0;
-C_Yr = 0;
-C_nbeta = 0.25;
-C_np = 0.022;
-C_nr = -0.35;
+C_l_beta = -0.12;
+C_l_p = -0.26;
+C_l_r = 0.14;
+C_Y_beta = -0.98;
+C_Y_p = 0;
+C_Y_r = 0;
+C_n_beta = 0.25;
+C_n_p = 0.022;
+C_n_r = -0.35;
 
 % Control Derivatives
-C_ldeltaa = 0.08;
-C_ldeltar = 0.105;
-C_Ydeltaa = 0;
-C_Ydeltar = -0.17;
-C_ndeltaa = 0.06;
-C_ndeltar = 0;%-0.074;?
+C_l_delta_a = 0.08;
+C_l_delta_r = 0.105;
+C_Y_delta_a = 0;
+C_Y_delta_r = -0.17;
+C_n_delta_a = 0.06;
+C_n_delta_r = -0.032;
 %% Standard Atmospheric Calculations
 
 [T, a, P, rho] = atmosisa(altt);
@@ -173,7 +181,7 @@ Mq = (1/4*rho*V_a0*c_bar^2*S*C_m_q)/J_y;
 %Mw_dot = 1/4*rho*c_bar^2*S*C_malpha_dot;
 
 %Lateral Dimensional Derivatives
-Yv = ((rho*S*b*v0)/(4*m*V_a0))*(C_Y_p*p0 + C_Y_r*r0) + ((rho*S*v0)/m)*(C_Y0 + C_Y_beta*beta0 + C_Y_delta_a*delta_a + C_Y_delta_r*delta_r0) + ((rho*S*C_Y_beta)/(2*m))*sqrt(u0^2+w0^2)
+Yv = ((rho*S*b*v0)/(4*m*V_a0))*(C_Y_p*p0 + C_Y_r*r0) + ((rho*S*v0)/m)*(C_Y0 + C_Y_beta*beta0 + C_Y_delta_a*delta_a + C_Y_delta_r*delta_r0) + ((rho*S*C_Y_beta)/(2*m))*sqrt(u0^2+w0^2);
 Yp = w0 + (rho*V_a0*S*b)/(4*m)*C_Y_p;
 Yr = u0 + (rho*V_a0*S*b)/(4*m)*C_Y_r;
 

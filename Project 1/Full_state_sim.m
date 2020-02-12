@@ -197,9 +197,9 @@ Yv = ((rho*S*b*v0)/(4*m*V_a0))*(C_Y_p*p0 + C_Y_r*r0) + ((rho*S*v0)/m)*(C_Y_0 + C
 Yp = w0 + (rho*V_a0*S*b)/(4*m)*C_Y_p;
 Yr = u0 + (rho*V_a0*S*b)/(4*m)*C_Y_r;
 
-Lv = ((rho*S*b*v0)/(4*V_a0))*(C_p_p*p0 + C_p_r*r0) + (rho*S*v0)*(C_p_0 + C_P_beta*beta0 + C_P_delta_a*delta_a + C_P_delta_r*delta_r0) + ((rho*S*C_P_beta)/(2))*sqrt(u0^2+w0^2);
-Lp = Gamma_1*q0+ (rho*V_a0*S*b^2)/4 * C_P_p;
-Lr = -Gamma_2*q0+ (rho*V_a0*S*b^2)/4 * C_P_r;
+Lv = ((rho*S*b*v0)/(4*V_a0))*(C_p_p*p0 + C_p_r*r0) + (rho*S*v0)*(C_p_0 + C_p_beta*beta0 + C_p_delta_a*delta_a0 + C_p_delta_r*delta_r0) + ((rho*S*C_p_beta)/(2))*sqrt(u0^2+w0^2);
+Lp = Gamma_1*q0+ (rho*V_a0*S*b^2)/4 * C_p_p;
+Lr = -Gamma_2*q0+ (rho*V_a0*S*b^2)/4 * C_p_r;
 
 Nv = ((rho*S*b*v0)/(4*V_a0))*(C_r_p*p0 + C_r_r*r0) + (rho*S*v0)*(C_r0 + C_r_beta*beta0 + C_r_delta_a*delta_a + C_r_delta_r*delta_r0) + ((rho*S*C_r_beta)/2)*sqrt(u0^2+w0^2);
 Np = Gamma_7*q0+ (rho*V_a0*S*b^2)/4 * C_r_p;

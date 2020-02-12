@@ -132,7 +132,6 @@ C_Ybeta = -0.98;
 C_Yp = 0;
 C_Yr = 0;
 C_nbeta = 0.25;
-C_nTbeta = 0;%?
 C_np = 0.022;
 C_nr = -0.35;
 
@@ -148,47 +147,25 @@ C_ndeltar = 0;%-0.074;?
 [T, a, P, rho] = atmosisa(altt);
     
 %% Nondimensional Stability Derivatives
-%From "translation" key in HW3
-%C_xu = -(C_Du+2*C_D1);
+
 C_X_0 = -C_D0*cos(alpha0) + C_L0*sin(alpha0);
 C_X_alpha = -C_D_alpha*cos(alpha0) + C_L_alpha*sin(alpha0);
-%C_xalpha_dot = 0;
 C_X_q = -C_D_q*cos(alpha0) + C_L_q*sin(alpha0);
 C_X_delta_e = -C_D_delta_e*cos(alpha0) + C_L_delta_e*sin(alpha0);
-%C_X_deltat = C_Txu+2*C_Tx1;
-
-% C_Z_u = -(C_Lu+2*C_L1);
-% C_Z_alpha = -(C_Lalpha+C_D1);
-% C_zalpha_dot = -C_Lalpha_dot;
-% C_Z_q = -C_Lq;
-% C_Z_delta_e = -C_Ldeltae;
-% C_zdeltap = 0;
 
 C_Z_0 = -C_D0*sin(alpha0) + C_L0*cos(alpha0);
 C_Z_alpha = -C_D_alpha*sin(alpha0) + C_L_alpha*cos(alpha0);
 C_Z_q = -C_D_q*sin(alpha0) + C_L_q*cos(alpha0);
 C_Z_delta_e = -C_D_delta_e*sin(alpha0) + C_L_delta_e*cos(alpha0);
 
-%C_mu = C_mu+2*C_m1;
-%C_m_alpha = C_malpha;
-%C_malpha_dot = C_malpha_dot;
-%C_m_q = C_m_q;
-%C_m_delta_e = C_m_delta_e;
-%C_mdeltap = C_mTu+2*C_mT1;
-
-% Nondimensional
-%C_w0 = w/(1/2*rho*u0^2*S);          %Non-dimensional weight [unitless]
-
 % Longitudinal Dimensional Derivatives
 Xu = (u0*rho*S)/m * (C_X_0 + C_X_alpha*alpha0 + C_X_delta_e*delta_e0) - (rho*S*w0*C_X_alpha)/2*m + (rho*S*c_bar*C_X_q*u0*q0)/4*m*V_a0 - (rho*S_prop*C_prop*u0)/m;
 Xw = -q0 + (w0*rho*S)/m * (C_X_0 + C_X_alpha*alpha0 + C_X_delta_e*delta_e0) + (rho*S*c_bar*C_X_q*w0*q0)/4*m*V_a0 + (rho*S*u0*C_X_alpha)/2*m - (rho*S_prop*C_prop*w0)/m;
 Xq = -w0 + (rho*V_a0*c_bar*S*C_X_q)/4*m;
-%Xw_dot = 1/4*rho*c_bar*S*C_xalpha_dot;
 
 Zu = q0 + (u0*rho*S)/m * (C_Z_0 + C_Z_alpha*alpha0 + C_Z_delta_e*delta_e0) - (rho*S*w0*C_Z_alpha)/2*m + (rho*S*c_bar*C_Z_q*u0*q0)/4*m*V_a0;
 Zw = (w0*rho*S)/m * (C_Z_0 + C_Z_alpha*alpha0 + C_Z_delta_e*delta_e0) - (rho*S*u0*C_Z_alpha)/2*m + (rho*S*c_bar*C_Z_q*w0*q0)/4*m*V_a0;
 Zq = u0 + (rho*V_a0*S*C_Z_q*q0)/4*m;
-%Zw_dot = 1/4*rho*c_bar*S*C_zalpha_dot;
 
 Mu = ((u0*rho*S*c_bar)/J_y)*(C_m0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) - (rho*S*c_bar*C_m_alpha*u0)/2*J_y + (rho*S*c_bar^2 *q0*u0)/(4*J_y*V_a0);
 Mw = ((w0*rho*S*c_bar)/J_y)*(C_m0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) + (rho*S*c_bar*C_m_alpha*u0)/2*J_y + (rho*S*c_bar^2 *q0*u0)/(4*J_y*V_a0);
@@ -196,38 +173,36 @@ Mq = (1/4*rho*V_a0*c_bar^2*S*C_m_q)/J_y;
 %Mw_dot = 1/4*rho*c_bar^2*S*C_malpha_dot;
 
 %Lateral Dimensional Derivatives
-Yv = 1/2*rho*u0*S*C_Ybeta;
-Yp = 1/4*rho*u0*b*S*C_Yp;
-Yr = 1/4*rho*u0*b*S*C_Yr;
+Yv = ((rho*S*b*v0)/(4*m*V_a0))*(C_Y_p*p0 + C_Y_r*r0) + ((rho*S*v0)/m)*(C_Y0 + C_Y_beta*beta0 + C_Y_delta_a*delta_a + C_Y_delta_r*delta_r0) + ((rho*S*C_Y_beta)/(2*m))*sqrt(u0^2+w0^2)
+Yp = w0 + (rho*V_a0*S*b)/(4*m)*C_Y_p;
+Yr = u0 + (rho*V_a0*S*b)/(4*m)*C_Y_r;
 
-Lv = 1/2*rho*u0*b*S*C_lbeta;
-Lp = 1/4*rho*u0*b^2*S*C_lp;
-Lr = 1/4*rho*u0*b^2*S*C_lr;
+Lv = ((rho*S*b*v0)/(4*V_a0))*(C_P_p*p0 + C_P_r*r0) + (rho*S*v0)*(C_P0 + C_P_beta*beta0 + C_P_delta_a*delta_a + C_P_delta_r*delta_r0) + ((rho*S*C_P_beta)/(2))*sqrt(u0^2+w0^2);
+Lp = Gamma_1*q0+ (rho*V_a0*S*b^2)/4 * C_P_p;
+Lr = -Gamma_2*q0+ (rho*V_a0*S*b^2)/4 * C_P_r;
 
-Nv = 1/2*rho*u0*b*S*C_nbeta;
-Np = 1/4*rho*u0*b^2*S*C_np;
-Nr = 1/4*rho*u0*b^2*S*C_nr;
+Nv = ((rho*S*b*v0)/(4*V_a0))*(C_r_p*p0 + C_r_r*r0) + (rho*S*v0)*(C_r0 + C_r_beta*beta0 + C_r_delta_a*delta_a + C_r_delta_r*delta_r0) + ((rho*S*C_r_beta)/2)*sqrt(u0^2+w0^2);
+Np = Gamma_7*q0+ (rho*V_a0*S*b^2)/4 * C_r_p;
+Nr = -Gamma_1*q0+ (rho*V_a0*S*b^2)/4 * C_r_r;
 
 %% Dimensional Control Derivatives
 %Longitudinal Dimensional Control Derivatives
-X_deltae = (C_X_delta_e*1/2*rho*V_a^2*S)/m;
-X_deltat = (rho*S_prop*C_prop*k_motor^2*delta_t0)/m;
+X_delta_e = (C_X_delta_e*1/2*rho*V_a^2*S)/m;
+X_delta_t = (rho*S_prop*C_prop*k_motor^2*delta_t0)/m;
 
-Z_deltae = (C_Z_delta_e*1/2*rho*V_a0^2*S)/m;
-%Z_deltap = C_zdeltap*1/2*rho*u0^2*S;
+Z_delta_e = (C_Z_delta_e*1/2*rho*V_a0^2*S)/m;
 
-M_deltae = (C_m_delta_e*1/2*rho*V_a0^2*S*c_bar)/J_y;
-%M_deltap = C_mdeltap*1/2*rho*u0^2*S*c_bar;
+M_delta_e = (C_m_delta_e*1/2*rho*V_a0^2*S*c_bar)/J_y;
 
 %Lateral Dimensional Control Derivatives
-Y_deltaa = C_Ydeltaa*1/2*rho*u0^2*S;
-Y_deltar = C_Ydeltar*1/2*rho*u0^2*S;
+Y_delta_a = (C_Y_delta_a*1/2*rho*V_a0^2*S)/m;
+Y_delta_r = (C_Y_delta_r*1/2*rho*V_a0^2*S)/m;
 
-L_deltaa = C_ldeltaa*1/2*rho*u0^2*S*b;
-L_deltar = C_ldeltar*1/2*rho*u0^2*S*b;
+L_delta_a = C_P_delta_a*1/2*rho*V_a0^2*S*b;
+L_delta_r = C_P_delta_r*1/2*rho*V_a0^2*S*b;
 
-N_deltaa = C_ndeltaa*1/2*rho*u0^2*S*b;
-N_deltar = C_ndeltar*1/2*rho*u0^2*S*b;
+N_delta_a = C_r_delta_a*1/2*rho*V_a0^2*S*b;
+N_delta_r = C_r_delta_r*1/2*rho*V_a0^2*S*b;
 
 %% Longitudinal Linear Model
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -267,9 +242,9 @@ A_long = [Long1A, Long2A, Long3A, Long4A Long1_5A;
           Long13A, Long14A, Long15A, Long16A Long4_5A;
           Long5_1A Long5_2A Long5_3A Long5_4A Long5_5A]
       
-B_long = [X_deltae X_deltat;
-          Z_deltae 0;
-          M_deltae 0;
+B_long = [X_delta_e X_delta_t;
+          Z_delta_e 0;
+          M_delta_e 0;
           0 0;
           0 0;]
       
@@ -306,10 +281,11 @@ A_lat = [Lat1A, Lat2A, Lat3A, Lat4A Lat1_5A;
           Lat13A, Lat14A, Lat15A, Lat16A Lat4_5A;
           Lat5_1A Lat5_2A Lat5_3A Lat5_4A Lat5_5A]
       
-B_lat = [Y_delta_a                              Y_delta_r;
+B_lat = [Y_delta_a Y_delta_r;
          L_delta_a  L_delta_r;
-         N_delta_a  (N_deltar/Iz_prime)+Izx_prime*L_deltar;
-         0                                       0]
+         N_delta_a  N_delta_r;
+         0 0;
+         0 0]
 
      
 %f_p_x = .5*rho*S_prop*C_prop*((k_motor*del_t)^2 - V_a^2);

@@ -55,9 +55,11 @@ h_CG = 0.32;                        %Esitmated location of the center of gravity
 
 V_a0 = 30;
 alpha0 = 0;
+beta0 = 0;
 delta_e0 = deg2rad(4);
 delta_t0 = 0;
-
+delta_a0 = 0;
+delta_r0 = 0;
 
 u0 = V;                             %Initial velocity [ft/sec]
 v0 = 0;
@@ -133,12 +135,15 @@ C_mih = 0;% -2.5;?
 
 %% Lateral Directional Aerodynamic Coefficients
 % Stability Derivatives
+C_l_0 = 0;
 C_l_beta = -0.12;
 C_l_p = -0.26;
 C_l_r = 0.14;
+C_Y_0 = 0;
 C_Y_beta = -0.98;
 C_Y_p = 0;
 C_Y_r = 0;
+C_n_0 = 0;
 C_n_beta = 0.25;
 C_n_p = 0.022;
 C_n_r = -0.35;
@@ -166,6 +171,13 @@ C_Z_alpha = -C_D_alpha*sin(alpha0) + C_L_alpha*cos(alpha0);
 C_Z_q = -C_D_q*sin(alpha0) + C_L_q*cos(alpha0);
 C_Z_delta_e = -C_D_delta_e*sin(alpha0) + C_L_delta_e*cos(alpha0);
 
+C_p_0 =       Gamma_3*C_l_0 + Gamma_4*C_n_0;
+C_p_beta =    Gamma_3*C_l_beta + Gamma_4*C_n_beta;
+C_p_p =       Gamma_3*C_l_p + Gamma_4*C_n_p;
+C_p_r =       Gamma_3*C_l_r + Gamma_4*C_n_r;
+C_p_delta_a = Gamma_3*C_l_delta_a + Gamma_4*C_n_delta_a;
+C_p_delta_r = Gamma_3*C_l_delta_r + Gamma_4*C_n_delta_r;
+
 % Longitudinal Dimensional Derivatives
 Xu = (u0*rho*S)/m * (C_X_0 + C_X_alpha*alpha0 + C_X_delta_e*delta_e0) - (rho*S*w0*C_X_alpha)/2*m + (rho*S*c_bar*C_X_q*u0*q0)/4*m*V_a0 - (rho*S_prop*C_prop*u0)/m;
 Xw = -q0 + (w0*rho*S)/m * (C_X_0 + C_X_alpha*alpha0 + C_X_delta_e*delta_e0) + (rho*S*c_bar*C_X_q*w0*q0)/4*m*V_a0 + (rho*S*u0*C_X_alpha)/2*m - (rho*S_prop*C_prop*w0)/m;
@@ -181,11 +193,11 @@ Mq = (1/4*rho*V_a0*c_bar^2*S*C_m_q)/J_y;
 %Mw_dot = 1/4*rho*c_bar^2*S*C_malpha_dot;
 
 %Lateral Dimensional Derivatives
-Yv = ((rho*S*b*v0)/(4*m*V_a0))*(C_Y_p*p0 + C_Y_r*r0) + ((rho*S*v0)/m)*(C_Y0 + C_Y_beta*beta0 + C_Y_delta_a*delta_a + C_Y_delta_r*delta_r0) + ((rho*S*C_Y_beta)/(2*m))*sqrt(u0^2+w0^2);
+Yv = ((rho*S*b*v0)/(4*m*V_a0))*(C_Y_p*p0 + C_Y_r*r0) + ((rho*S*v0)/m)*(C_Y_0 + C_Y_beta*beta0 + C_Y_delta_a*delta_a0 + C_Y_delta_r*delta_r0) + ((rho*S*C_Y_beta)/(2*m))*sqrt(u0^2+w0^2);
 Yp = w0 + (rho*V_a0*S*b)/(4*m)*C_Y_p;
 Yr = u0 + (rho*V_a0*S*b)/(4*m)*C_Y_r;
 
-Lv = ((rho*S*b*v0)/(4*V_a0))*(C_P_p*p0 + C_P_r*r0) + (rho*S*v0)*(C_P0 + C_P_beta*beta0 + C_P_delta_a*delta_a + C_P_delta_r*delta_r0) + ((rho*S*C_P_beta)/(2))*sqrt(u0^2+w0^2);
+Lv = ((rho*S*b*v0)/(4*V_a0))*(C_p_p*p0 + C_p_r*r0) + (rho*S*v0)*(C_p_0 + C_P_beta*beta0 + C_P_delta_a*delta_a + C_P_delta_r*delta_r0) + ((rho*S*C_P_beta)/(2))*sqrt(u0^2+w0^2);
 Lp = Gamma_1*q0+ (rho*V_a0*S*b^2)/4 * C_P_p;
 Lr = -Gamma_2*q0+ (rho*V_a0*S*b^2)/4 * C_P_r;
 

@@ -173,6 +173,13 @@ C_p_r =       Gamma_3*C_l_r + Gamma_4*C_n_r;
 C_p_delta_a = Gamma_3*C_l_delta_a + Gamma_4*C_n_delta_a;
 C_p_delta_r = Gamma_3*C_l_delta_r + Gamma_4*C_n_delta_r;
 
+C_r_0 =       Gamma_4*C_l_0 + Gamma_8*C_n_0;
+C_r_beta =    Gamma_4*C_l_beta + Gamma_8*C_n_beta;
+C_r_p =       Gamma_4*C_l_p + Gamma_8*C_n_p;
+C_r_r =       Gamma_4*C_l_r + Gamma_8*C_n_r;
+C_r_delta_a = Gamma_4*C_l_delta_a + Gamma_8*C_n_delta_a;
+C_r_delta_r = Gamma_4*C_l_delta_r + Gamma_8*C_n_delta_r;
+
 % Longitudinal Dimensional Derivatives
 Xu = (u_star*rho*S)/m * (C_X_0 + C_X_alpha*alpha_star + C_X_delta_e*delta_e_star) - (rho*S*w_star*C_X_alpha)/2*m + (rho*S*c_bar*C_X_q*u_star*q_star)/4*m*V_a_star - (rho*S_prop*C_prop*u_star)/m;
 Xw = -q_star + (w_star*rho*S)/m * (C_X_0 + C_X_alpha*alpha_star + C_X_delta_e*delta_e_star) + (rho*S*c_bar*C_X_q*w_star*q_star)/4*m*V_a_star + (rho*S*u_star*C_X_alpha)/2*m - (rho*S_prop*C_prop*w_star)/m;

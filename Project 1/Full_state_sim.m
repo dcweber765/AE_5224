@@ -323,30 +323,33 @@ B_lat = [Y_delta_a Y_delta_r;
 % Delta_del_e = el_rud(1);
 % Delta_del_r = el_rud(2);
 % 
-% Delta_X_long = [u_t;
-%           w_t;
-%           q
-%           theta
-%           p_z
-%
-%
-% Delta_X_lat = [v_t;
-%          p;
-%          r;
-%          phi;
-%          psi];
+% Delta_X_long = [Delta_u_t; Delta_w_t; Delta_q; Delta_theta; Delta_p_z];
+% 
+% Delta_X_lat = [Delta_v_t; Delta_p; Delta_r; Delta_phi; Delta_psi];
 %      
-% U_long = [del_e;
-%           del_p];
+% Delta_U_long = [Delta_delta_e; Delta_delta_p];
 % 
-% U_lat = [del_a;
-%          del_r];
+% Delta_U_lat = [Delta_delta_a; Delta_delta_r];
 %      
-% X_dot_long = A_long*X_long + B_long*U_long
+% Delta_X_dot_long = A_long*Delta_X_long + B_long*Delta_U_long
 % 
-% X_dot_lat = A_lat*X_lat + B_lat*U_lat
+% Delta_X_dot_lat = A_lat*Delta_X_lat + B_lat*Delta_U_lat
 % 
+% Delta_X_long_plus = Delta_X_dot_long*dT
+% Delta_X_lat_plus = Delta_X_dot_lat*dT
 % 
+% Delta_X = [Delta_X_long_plus(1)*dT;...
+%            Delta_X_lat_plus(1)*dT;...
+%            Delta_X_long_plus(5);...
+%            Delta_X_long_plus(1);...
+%            Delta_X_lat_plus(1);...
+%            Delta_X_long_plus(2);...
+           
+           
+Long_sys = ss(A_long,B_long,zeros(5,5),0);
+Lat_sys = ss(A_lat,B_lat,zeros(5,5),0);
+
+
 % 
 % f = [-m*g*sin(theta);
 %      m*g*cos(theta)*sin(phi);

@@ -37,41 +37,44 @@ X = [p_t;
     euler_ang;
     omega_tb_b;]
 
-%% Aircraft Data (Learjet 24 Aircraft)
+%% Aircraft Data (UAV)
 % Geometric data
 S = .55;                            %Wing surface area [m^2]
 c_bar = 0.18994;                          %Mean Aerodynamic Chord (MAC) [m]
 b = 2.8956;                             %Wing span [m]
+%h_CG = 0.32;                        %Esitmated location of the center of gravity on the wing chord [unitless]
 
-% Flight Conditions Data
+
+%% Flight Conditions Data
+
 g = 9.8;
 altt = 100;                       %Altitude [m]
 Mach = 0.1;                         %Mach of the aircraft [unitless]
 V = 30;                            %True airspeed [m/sec]
-h_CG = 0.32;                        %Esitmated location of the center of gravity on the wing chord [unitless]
+[T, a, P, rho] = atmosisa(altt); %Standard Atmospheric Calculations
 %alpha = deg2rad(2.7);               %Steady state angle of attck [rad]
 
 %% Trim
 
-V_a0 = 30;
-alpha0 = 0;
-beta0 = 0;
-delta_e0 = deg2rad(4);
-delta_t0 = 0;
-delta_a0 = 0;
-delta_r0 = 0;
+V_a_star = 30;
+alpha_star = 0;
+beta_star = 0;
+delta_e_star = deg2rad(4);
+delta_t_star = 0;
+delta_a_star = 0;
+delta_r_star = 0;
 
-u0 = V;                             %Initial velocity [ft/sec]
-v0 = 0;
-w0 = 0;
+u_star = V;                             %Initial velocity [ft/sec]
+v_star = 0;
+w_star = 0;
 
-p0 = 0;
-q0 = 0;
-r0 = 0;
+p_star = 0;
+q_star = 0;
+r_star = 0;
 
-psi0 = 0;
-theta0 = deg2rad(0);                %Initial pitch angle [rad]
-phi0 = 0;
+psi_star = 0;
+theta_star = deg2rad(0);                %Initial pitch angle [rad]
+phi_star = 0;
 
 % Mass and Inertial Data
 
@@ -103,35 +106,29 @@ C_prop = 1;
 
 %% Longitudinal Aerodynamic Coefficients
 % Steady State
-C_L1 = 0.41;
-C_D1 = 0.0335;
-C_m1 = 0;
-C_Tx1 = 0.0335;
-C_mT1 = 0;
+% C_L1 = 0.41;
+% C_D1 = 0.0335;
+% C_m1 = 0;
+% C_Tx1 = 0.0335;
+% C_mT1 = 0;
 
 % Stability Derivatives
-C_D0 = 0.03;
+C_D_0 = 0.03;
 C_D_alpha = 0.3;
 C_D_q = 0;
-C_D_p = 0.0437;
 C_L0 = 0.28;
 C_L_alpha = 3.45;
 C_L_q = 0;
-C_m0 = -0.02338;
-C_mu = 0;%0.05;?
+C_m_0 = -0.02338;
 C_m_alpha = -0.38;
-
 C_m_q = -3.6;
 
-
+C_D_p = 0.0437;
 
 % Control Derivatives
 C_D_delta_e = 0;
-C_Dih = 0;%?
 C_L_delta_e = -0.36;
-C_Lih = 0;%0.94;%?
 C_m_delta_e = -0.5;
-C_mih = 0;% -2.5;?
 
 %% Lateral Directional Aerodynamic Coefficients
 % Stability Derivatives
@@ -155,21 +152,19 @@ C_Y_delta_a = 0;
 C_Y_delta_r = -0.17;
 C_n_delta_a = 0.06;
 C_n_delta_r = -0.032;
-%% Standard Atmospheric Calculations
 
-[T, a, P, rho] = atmosisa(altt);
     
 %% Nondimensional Stability Derivatives
 
-C_X_0 = -C_D0*cos(alpha0) + C_L0*sin(alpha0);
-C_X_alpha = -C_D_alpha*cos(alpha0) + C_L_alpha*sin(alpha0);
-C_X_q = -C_D_q*cos(alpha0) + C_L_q*sin(alpha0);
-C_X_delta_e = -C_D_delta_e*cos(alpha0) + C_L_delta_e*sin(alpha0);
+C_X_0 = -C_D_0*cos(alpha_star) + C_L0*sin(alpha_star);
+C_X_alpha = -C_D_alpha*cos(alpha_star) + C_L_alpha*sin(alpha_star);
+C_X_q = -C_D_q*cos(alpha_star) + C_L_q*sin(alpha_star);
+C_X_delta_e = -C_D_delta_e*cos(alpha_star) + C_L_delta_e*sin(alpha_star);
 
-C_Z_0 = -C_D0*sin(alpha0) + C_L0*cos(alpha0);
-C_Z_alpha = -C_D_alpha*sin(alpha0) + C_L_alpha*cos(alpha0);
-C_Z_q = -C_D_q*sin(alpha0) + C_L_q*cos(alpha0);
-C_Z_delta_e = -C_D_delta_e*sin(alpha0) + C_L_delta_e*cos(alpha0);
+C_Z_0 = -C_D_0*sin(alpha_star) + C_L0*cos(alpha_star);
+C_Z_alpha = -C_D_alpha*sin(alpha_star) + C_L_alpha*cos(alpha_star);
+C_Z_q = -C_D_q*sin(alpha_star) + C_L_q*cos(alpha_star);
+C_Z_delta_e = -C_D_delta_e*sin(alpha_star) + C_L_delta_e*cos(alpha_star);
 
 C_p_0 =       Gamma_3*C_l_0 + Gamma_4*C_n_0;
 C_p_beta =    Gamma_3*C_l_beta + Gamma_4*C_n_beta;
@@ -179,50 +174,49 @@ C_p_delta_a = Gamma_3*C_l_delta_a + Gamma_4*C_n_delta_a;
 C_p_delta_r = Gamma_3*C_l_delta_r + Gamma_4*C_n_delta_r;
 
 % Longitudinal Dimensional Derivatives
-Xu = (u0*rho*S)/m * (C_X_0 + C_X_alpha*alpha0 + C_X_delta_e*delta_e0) - (rho*S*w0*C_X_alpha)/2*m + (rho*S*c_bar*C_X_q*u0*q0)/4*m*V_a0 - (rho*S_prop*C_prop*u0)/m;
-Xw = -q0 + (w0*rho*S)/m * (C_X_0 + C_X_alpha*alpha0 + C_X_delta_e*delta_e0) + (rho*S*c_bar*C_X_q*w0*q0)/4*m*V_a0 + (rho*S*u0*C_X_alpha)/2*m - (rho*S_prop*C_prop*w0)/m;
-Xq = -w0 + (rho*V_a0*c_bar*S*C_X_q)/4*m;
+Xu = (u_star*rho*S)/m * (C_X_0 + C_X_alpha*alpha_star + C_X_delta_e*delta_e_star) - (rho*S*w_star*C_X_alpha)/2*m + (rho*S*c_bar*C_X_q*u_star*q_star)/4*m*V_a_star - (rho*S_prop*C_prop*u_star)/m;
+Xw = -q_star + (w_star*rho*S)/m * (C_X_0 + C_X_alpha*alpha_star + C_X_delta_e*delta_e_star) + (rho*S*c_bar*C_X_q*w_star*q_star)/4*m*V_a_star + (rho*S*u_star*C_X_alpha)/2*m - (rho*S_prop*C_prop*w_star)/m;
+Xq = -w_star + (rho*V_a_star*c_bar*S*C_X_q)/4*m;
 
-Zu = q0 + (u0*rho*S)/m * (C_Z_0 + C_Z_alpha*alpha0 + C_Z_delta_e*delta_e0) - (rho*S*w0*C_Z_alpha)/2*m + (rho*S*c_bar*C_Z_q*u0*q0)/4*m*V_a0;
-Zw = (w0*rho*S)/m * (C_Z_0 + C_Z_alpha*alpha0 + C_Z_delta_e*delta_e0) - (rho*S*u0*C_Z_alpha)/2*m + (rho*S*c_bar*C_Z_q*w0*q0)/4*m*V_a0;
-Zq = u0 + (rho*V_a0*S*C_Z_q*q0)/4*m;
+Zu = q_star + (u_star*rho*S)/m * (C_Z_0 + C_Z_alpha*alpha_star + C_Z_delta_e*delta_e_star) - (rho*S*w_star*C_Z_alpha)/2*m + (rho*S*c_bar*C_Z_q*u_star*q_star)/4*m*V_a_star;
+Zw = (w_star*rho*S)/m * (C_Z_0 + C_Z_alpha*alpha_star + C_Z_delta_e*delta_e_star) - (rho*S*u_star*C_Z_alpha)/2*m + (rho*S*c_bar*C_Z_q*w_star*q_star)/4*m*V_a_star;
+Zq = u_star + (rho*V_a_star*S*C_Z_q*q_star)/4*m;
 
-Mu = ((u0*rho*S*c_bar)/J_y)*(C_m0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) - (rho*S*c_bar*C_m_alpha*u0)/2*J_y + (rho*S*c_bar^2 *q0*u0)/(4*J_y*V_a0);
-Mw = ((w0*rho*S*c_bar)/J_y)*(C_m0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) + (rho*S*c_bar*C_m_alpha*u0)/2*J_y + (rho*S*c_bar^2 *q0*u0)/(4*J_y*V_a0);
-Mq = (1/4*rho*V_a0*c_bar^2*S*C_m_q)/J_y;
-%Mw_dot = 1/4*rho*c_bar^2*S*C_malpha_dot;
+Mu = ((u_star*rho*S*c_bar)/J_y)*(C_m_0 + C_m_alpha*alpha_star + C_m_delta_e*delta_e_star) - (rho*S*c_bar*C_m_alpha*u_star)/2*J_y + (rho*S*c_bar^2 *q_star*u_star)/(4*J_y*V_a_star);
+Mw = ((w_star*rho*S*c_bar)/J_y)*(C_m_0 + C_m_alpha*alpha_star + C_m_delta_e*delta_e_star) + (rho*S*c_bar*C_m_alpha*u_star)/2*J_y + (rho*S*c_bar^2 *q_star*u_star)/(4*J_y*V_a_star);
+Mq = (1/4*rho*V_a_star*c_bar^2*S*C_m_q)/J_y;
 
 %Lateral Dimensional Derivatives
-Yv = ((rho*S*b*v0)/(4*m*V_a0))*(C_Y_p*p0 + C_Y_r*r0) + ((rho*S*v0)/m)*(C_Y_0 + C_Y_beta*beta0 + C_Y_delta_a*delta_a0 + C_Y_delta_r*delta_r0) + ((rho*S*C_Y_beta)/(2*m))*sqrt(u0^2+w0^2);
-Yp = w0 + (rho*V_a0*S*b)/(4*m)*C_Y_p;
-Yr = u0 + (rho*V_a0*S*b)/(4*m)*C_Y_r;
+Yv = ((rho*S*b*v_star)/(4*m*V_a_star))*(C_Y_p*p_star + C_Y_r*r_star) + ((rho*S*v_star)/m)*(C_Y_0 + C_Y_beta*beta_star + C_Y_delta_a*delta_a_star + C_Y_delta_r*delta_r_star) + ((rho*S*C_Y_beta)/(2*m))*sqrt(u_star^2+w_star^2);
+Yp = w_star + (rho*V_a_star*S*b)/(4*m)*C_Y_p;
+Yr = u_star + (rho*V_a_star*S*b)/(4*m)*C_Y_r;
 
-Lv = ((rho*S*b*v0)/(4*V_a0))*(C_p_p*p0 + C_p_r*r0) + (rho*S*v0)*(C_p_0 + C_p_beta*beta0 + C_p_delta_a*delta_a0 + C_p_delta_r*delta_r0) + ((rho*S*C_p_beta)/(2))*sqrt(u0^2+w0^2);
-Lp = Gamma_1*q0+ (rho*V_a0*S*b^2)/4 * C_p_p;
-Lr = -Gamma_2*q0+ (rho*V_a0*S*b^2)/4 * C_p_r;
+Lv = ((rho*S*b*v_star)/(4*V_a_star))*(C_p_p*p_star + C_p_r*r_star) + (rho*S*v_star)*(C_p_0 + C_p_beta*beta_star + C_p_delta_a*delta_a_star + C_p_delta_r*delta_r_star) + ((rho*S*C_p_beta)/(2))*sqrt(u_star^2+w_star^2);
+Lp = Gamma_1*q_star+ (rho*V_a_star*S*b^2)/4 * C_p_p;
+Lr = -Gamma_2*q_star+ (rho*V_a_star*S*b^2)/4 * C_p_r;
 
-Nv = ((rho*S*b*v0)/(4*V_a0))*(C_r_p*p0 + C_r_r*r0) + (rho*S*v0)*(C_r0 + C_r_beta*beta0 + C_r_delta_a*delta_a + C_r_delta_r*delta_r0) + ((rho*S*C_r_beta)/2)*sqrt(u0^2+w0^2);
-Np = Gamma_7*q0+ (rho*V_a0*S*b^2)/4 * C_r_p;
-Nr = -Gamma_1*q0+ (rho*V_a0*S*b^2)/4 * C_r_r;
+Nv = ((rho*S*b*v_star)/(4*V_a_star))*(C_r_p*p_star + C_r_r*r_star) + (rho*S*v_star)*(C_r0 + C_r_beta*beta_star + C_r_delta_a*delta_a + C_r_delta_r*delta_r_star) + ((rho*S*C_r_beta)/2)*sqrt(u_star^2+w_star^2);
+Np = Gamma_7*q_star+ (rho*V_a_star*S*b^2)/4 * C_r_p;
+Nr = -Gamma_1*q_star+ (rho*V_a_star*S*b^2)/4 * C_r_r;
 
 %% Dimensional Control Derivatives
 %Longitudinal Dimensional Control Derivatives
 X_delta_e = (C_X_delta_e*1/2*rho*V_a^2*S)/m;
-X_delta_t = (rho*S_prop*C_prop*k_motor^2*delta_t0)/m;
+X_delta_t = (rho*S_prop*C_prop*k_motor^2*delta_t_star)/m;
 
-Z_delta_e = (C_Z_delta_e*1/2*rho*V_a0^2*S)/m;
+Z_delta_e = (C_Z_delta_e*1/2*rho*V_a_star^2*S)/m;
 
-M_delta_e = (C_m_delta_e*1/2*rho*V_a0^2*S*c_bar)/J_y;
+M_delta_e = (C_m_delta_e*1/2*rho*V_a_star^2*S*c_bar)/J_y;
 
 %Lateral Dimensional Control Derivatives
-Y_delta_a = (C_Y_delta_a*1/2*rho*V_a0^2*S)/m;
-Y_delta_r = (C_Y_delta_r*1/2*rho*V_a0^2*S)/m;
+Y_delta_a = (C_Y_delta_a*1/2*rho*V_a_star^2*S)/m;
+Y_delta_r = (C_Y_delta_r*1/2*rho*V_a_star^2*S)/m;
 
-L_delta_a = C_P_delta_a*1/2*rho*V_a0^2*S*b;
-L_delta_r = C_P_delta_r*1/2*rho*V_a0^2*S*b;
+L_delta_a = C_P_delta_a*1/2*rho*V_a_star^2*S*b;
+L_delta_r = C_P_delta_r*1/2*rho*V_a_star^2*S*b;
 
-N_delta_a = C_r_delta_a*1/2*rho*V_a0^2*S*b;
-N_delta_r = C_r_delta_r*1/2*rho*V_a0^2*S*b;
+N_delta_a = C_r_delta_a*1/2*rho*V_a_star^2*S*b;
+N_delta_r = C_r_delta_r*1/2*rho*V_a_star^2*S*b;
 
 %% Longitudinal Linear Model
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -232,12 +226,12 @@ N_delta_r = C_r_delta_r*1/2*rho*V_a0^2*S*b;
 Long1A = Xu;                                            %Row 1, Column 1
 Long2A = Xw;                                            %Row 1, Column 2
 Long3A = Xq;                                               %Row 1, Column 3
-Long4A = -g*cos(theta0);                                  %Row 1, Column 4
+Long4A = -g*cos(theta_star);                                  %Row 1, Column 4
 Long1_5A = 0;
 Long5A = Zu;                                   %Row 2, Column 1
 Long6A = Zw;                                   %Row 2, Column 2
 Long7A = Zq;                          %Row 2, Column 3
-Long8A = -g*sin(theta0);                   %Row 2, Column 4
+Long8A = -g*sin(theta_star);                   %Row 2, Column 4
 Long2_5A = 0;
 Long9A = Mu;            %Row 3, Column 1
 Long10A = Mw;           %Row 3, Column 2
@@ -249,10 +243,10 @@ Long14A = 0;                                              %Row 4, Column 2
 Long15A = 1;                                              %Row 4, Column 3
 Long16A = 0;                                              %Row 4, Column 4
 Long4_5A = 0;
-Long5_1A = sin(theta0);
-Long5_2A = -cos(theta0);
+Long5_1A = sin(theta_star);
+Long5_2A = -cos(theta_star);
 Long5_3A = 0;
-Long5_4A = u0*cos(theta0)+w0*sin(theta0);
+Long5_4A = u_star*cos(theta_star)+w_star*sin(theta_star);
 Long5_5A = 0;
 
 
@@ -272,7 +266,7 @@ B_long = [X_delta_e X_delta_t;
 Lat1A = Y_v;
 Lat2A = Y_p;
 Lat3A = Y_r;
-Lat4A = g*cos(theta0)*cos(phi0);
+Lat4A = g*cos(theta_star)*cos(phi_star);
 Lat1_5A = 0;
 Lat5A = L_v;
 Lat6A = L_p;
@@ -286,56 +280,54 @@ Lat12A = 0;
 Lat3_5A = 0;
 Lat13A = 0;
 Lat14A = 1;
-Lat15A = cos(phi0)*tan(theta0);
-Lat16A = q0*cos(phi0)*tan(theta0) - r0*sin(phi0)*tan(theta0);
+Lat15A = cos(phi_star)*tan(theta_star);
+Lat16A = q_star*cos(phi_star)*tan(theta_star) - r_star*sin(phi_star)*tan(theta_star);
 Lat4_5A = 0;
 Lat5_1A = 0;
 Lat5_2A = 0;
-Lat5_3A = cos(phi0)*1/cos(theta0);
-Lat5_4A = p0*cos(phi0)*1/cos(theta0) - r0*sin(phi0)*1/cos(theta0);
+Lat5_3A = cos(phi_star)*1/cos(theta_star);
+Lat5_4A = p_star*cos(phi_star)*1/cos(theta_star) - r_star*sin(phi_star)*1/cos(theta_star);
 Lat5_5A = 0;
 
 A_lat = [Lat1A, Lat2A, Lat3A, Lat4A Lat1_5A;
           Lat5A, Lat6A, Lat7A, Lat8A Lat2_5A;
           Lat9A, Lat10A, Lat11A, Lat12A Lat3_5A;
           Lat13A, Lat14A, Lat15A, Lat16A Lat4_5A;
-          Lat5_1A Lat5_2A Lat5_3A Lat5_4A Lat5_5A]
+          Lat5_1A Lat5_2A Lat5_3A Lat5_4A Lat5_5A];
       
 B_lat = [Y_delta_a Y_delta_r;
          L_delta_a  L_delta_r;
          N_delta_a  N_delta_r;
          0 0;
-         0 0]
+         0 0];
 
      
 %f_p_x = .5*rho*S_prop*C_prop*((k_motor*del_t)^2 - V_a^2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Inputs
-% del_a
-% del_p
-% del_r_r
-% del_r_l
+% Delta_del_a
+% Delta_del_p
+% Delta_del_r_r
+% Delta_del_r_l
 
 % [el_rud] = [1 1; -1 1]*[del_r_r; del_r_l];
 % 
-% del_e = el_rud(1);
-% del_r = el_rud(2);
+% Delta_del_e = el_rud(1);
+% Delta_del_r = el_rud(2);
 % 
-% X_long = [p_x;
-%           p_z;
-%           u_t;
+% Delta_X_long = [u_t;
 %           w_t;
-%           theta;
-%           q];
-% 
-%       
-% X_lat = [p_y;
-%          v_t;
-%          psi;
-%          phi;
+%           q
+%           theta
+%           p_z
+%
+%
+% Delta_X_lat = [v_t;
 %          p;
-%          r];
+%          r;
+%          phi;
+%          psi];
 %      
 % U_long = [del_e;
 %           del_p];

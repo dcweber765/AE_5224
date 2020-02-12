@@ -202,7 +202,7 @@ Lv = ((rho*S*b*v_star)/(4*V_a_star))*(C_p_p*p_star + C_p_r*r_star) + (rho*S*v_st
 Lp = Gamma_1*q_star+ (rho*V_a_star*S*b^2)/4 * C_p_p;
 Lr = -Gamma_2*q_star+ (rho*V_a_star*S*b^2)/4 * C_p_r;
 
-Nv = ((rho*S*b*v_star)/(4*V_a_star))*(C_r_p*p_star + C_r_r*r_star) + (rho*S*v_star)*(C_r0 + C_r_beta*beta_star + C_r_delta_a*delta_a + C_r_delta_r*delta_r_star) + ((rho*S*C_r_beta)/2)*sqrt(u_star^2+w_star^2);
+Nv = ((rho*S*b*v_star)/(4*V_a_star))*(C_r_p*p_star + C_r_r*r_star) + (rho*S*v_star)*(C_r_0 + C_r_beta*beta_star + C_r_delta_a*delta_a_star + C_r_delta_r*delta_r_star) + ((rho*S*C_r_beta)/2)*sqrt(u_star^2+w_star^2);
 Np = Gamma_7*q_star+ (rho*V_a_star*S*b^2)/4 * C_r_p;
 Nr = -Gamma_1*q_star+ (rho*V_a_star*S*b^2)/4 * C_r_r;
 
@@ -219,8 +219,8 @@ M_delta_e = (C_m_delta_e*1/2*rho*V_a_star^2*S*c_bar)/J_y;
 Y_delta_a = (C_Y_delta_a*1/2*rho*V_a_star^2*S)/m;
 Y_delta_r = (C_Y_delta_r*1/2*rho*V_a_star^2*S)/m;
 
-L_delta_a = C_P_delta_a*1/2*rho*V_a_star^2*S*b;
-L_delta_r = C_P_delta_r*1/2*rho*V_a_star^2*S*b;
+L_delta_a = C_p_delta_a*1/2*rho*V_a_star^2*S*b;
+L_delta_r = C_p_delta_r*1/2*rho*V_a_star^2*S*b;
 
 N_delta_a = C_r_delta_a*1/2*rho*V_a_star^2*S*b;
 N_delta_r = C_r_delta_r*1/2*rho*V_a_star^2*S*b;
@@ -270,19 +270,19 @@ B_long = [X_delta_e X_delta_t;
           0 0;]
       
 %% Lateral Linear Model
-Lat1A = Y_v;
-Lat2A = Y_p;
-Lat3A = Y_r;
+Lat1A = Yv;
+Lat2A = Yp;
+Lat3A = Yr;
 Lat4A = g*cos(theta_star)*cos(phi_star);
 Lat1_5A = 0;
-Lat5A = L_v;
-Lat6A = L_p;
-Lat7A = L_r;
+Lat5A = Lv;
+Lat6A = Lp;
+Lat7A = Lr;
 Lat8A = 0;
 Lat2_5A = 0;
-Lat9A = N_v;
-Lat10A = N_p;
-Lat11A = N_r;
+Lat9A = Nv;
+Lat10A = Np;
+Lat11A = Nr;
 Lat12A = 0;
 Lat3_5A = 0;
 Lat13A = 0;

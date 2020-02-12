@@ -49,14 +49,27 @@ C_Dp = 0.0437;
 AR = b^2/S; %aspect ratio
 %% Trim
 
-V_a0 = 30;
-alpha_star = 0;
-delta_e0 = deg2rad(4);
-delta_t0 = 0;
-
-w0 = 0;
-q0 = 0;
-
+V_a_star = 30;
+gamma_star = 0;
+R_star = inf;
+% alpha_star = 0;
+% beta_star = 0;
+% delta_e_star = deg2rad(4);
+% delta_t_star = 0;
+% delta_a_star = 0;
+% delta_r_star = 0;
+% 
+% u_star = V;                             %Initial velocity [ft/sec]
+% v_star = 0;
+% w_star = 0;
+% 
+% p_star = 0;
+% q_star = 0;
+% r_star = 0;
+% 
+% psi_star = 0;
+% theta_star = deg2rad(0);                %Initial pitch angle [rad]
+% phi_star = 0;
 
 % Mass and Inertial Data
 
@@ -365,31 +378,37 @@ f = [-m*g*sin(theta);
 
 %% Numerical Computation of Trim
 %%% Body frame velocities: u*,v*,w*
-u_star = Va_star*(cos(alpha_star)*cos(beta_star));
-v_star = Va_star*(sin(beta_star));
-w_star = Va_star*(sin(alpha_star)*cos(beta_star));
+u_star = V_a_star*(cos(alpha_star)*cos(beta_star));
+v_star = V_a_star*(sin(beta_star));
+w_star = V_a_star*(sin(alpha_star)*cos(beta_star));
 v_b_star = [u_star; v_star; w_star];
 %%% Pitch angle (with Vw = 0)
 theta_star = alpha_star + gamma_star;
 %%% Angular rates (theta* is expressed in terms of gamma*and alpha*)
-p_star = (Va_star/R_star)*(-sin(theta_star));
-q_star = (Va_star/R_star)*(sin(phi_star)*cos(theta_star));
-r_star = (Va_star/R_star)*(cos(phi_star)*cos(theta_star));
+p_star = (V_a_star/R_star)*(-sin(theta_star));
+q_star = (V_a_star/R_star)*(sin(phi_star)*cos(theta_star));
+r_star = (V_a_star/R_star)*(cos(phi_star)*cos(theta_star));
 pqr_star = [p_star; q_star; r_star];
 %%% Elevator, del_e
-del_e_star = ((((Jxz*((p_star)^2 - (r_star)^2)+((Jx-Jz)*(p_star*r_star)))/(0.5*rho*(Va_star)^2*c_bar*S))) - C_m0 - C_malpha*alpha_star - C_mq*(c*q_star/(2*Va_star)))/C_mdeltae;
+del_e_star = ((((J_xz*((p_star)^2 - (r_star)^2)+((J_x-J_z)*(p_star*r_star)))/(0.5*rho*(V_a_star)^2*c_bar*S))) - C_m0 - C_m_alpha*alpha_star - C_m_q*(c*q_star/(2*V_a_star)))/C_m_delta_e;
 %%% Throttle, del_t
-num1 = 2*m*(-r_star*v_star + q_star*w_star + g*sin(theta_star))-rho*(Va_star)^2*S*(coeff_X(alpha_star) + C_X_q*(c*q_star/(2*Va_star))+ C_X_delta_e*del_e_e_star);
+num1 = 2*m*(-r_star*v_star + q_star*w_star + g*sin(theta_star))-rho*(V_a_star)^2*S*(coeff_X(alpha_star) + C_X_q*(c*q_star/(2*V_a_star))+ C_X_delta_e*delta_e_star);
 den1 = rho*S_prop*C_prop*(k_motor)^2;
-del_t_star = sqrt((num1/den1)+ ((Va_star)^2/(k_motor)^2));
+del_t_star = sqrt((num1/den1)+ ((V_a_star)^2/(k_motor)^2));
 %%% Aileron (del_a) and Rudder (del_r)
 m1 = [C_p_delta_a C_p_delta_r; C_r_delta_a C_r_delta_r];
-m2_r1 = ((-Gamma_1*p_star*q_star + Gamma_2*q_star*r_star)/(0.5*rho*(Va_star)^2*S*b))- C_p_0 - C_p_beta*beta_star - C_p_p*((b*p_star)/2*Va_star) - C_p_r*((b*r_star/(2*Va_star)));
-m2_r2 = ((-Gamma_7*p_star*q_star + Gamma_1*q_star*r_star)/(0.5*rho*(Va_star)^2*S*b))- C_r_0 - C_r_beta*beta_star - C_r_p*((b*p_star)/2*Va_star) - C_r_r*((b*r_star/(2*Va_star)));
+m2_r1 = ((-Gamma_1*p_star*q_star + Gamma_2*q_star*r_star)/(0.5*rho*(V_a_star)^2*S*b))- C_p_0 - C_p_beta*beta_star - C_p_p*((b*p_star)/2*V_a_star) - C_p_r*((b*r_star/(2*V_a_star)));
+m2_r2 = ((-Gamma_7*p_star*q_star + Gamma_1*q_star*r_star)/(0.5*rho*(V_a_star)^2*S*b))- C_r_0 - C_r_beta*beta_star - C_r_p*((b*p_star)/2*V_a_star) - C_r_r*((b*r_star/(2*V_a_star)));
 m2 = [m2_r1;m2_r2];
 a_r_star_matrix = cross(inv(m1),m2);
 del_a_star = a_r_star_matrix(1);
 del_r_star = a_r_star_matrix(2);
+%% Trim Algorithm
+x_dot_star = [0;0;-V_a_star*sin(gamma_star);0;0;0;0;0; ((V_a_star/R_star)*cos(gamma_star));0;0;0];
+
+
+[X,U,Y,DX] = TRIM('SYS',X0,U0,Y0,IX,IU,IY,DX0,IDX);
+
 %% Coefficient of Lift
 
 function pos_or_neg = sign(alpha)

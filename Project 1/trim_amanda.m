@@ -363,9 +363,6 @@ f = [-m*g*sin(theta);
      m*g*cos(theta)*sin(phi);
      m*g*cos(theta)*cos(phi)] 
 
-
-
-
 %% Numerical Computation of Trim
 %%% Body frame velocities: u*,v*,w*
 u_star = Va_star*(cos(alpha_star)*cos(beta_star));
@@ -386,6 +383,13 @@ num1 = 2*m*(-r_star*v_star + q_star*w_star + g*sin(theta_star))-rho*(Va_star)^2*
 den1 = rho*S_prop*C_prop*(k_motor)^2;
 del_t_star = sqrt((num1/den1)+ ((Va_star)^2/(k_motor)^2));
 %%% Aileron (del_a) and Rudder (del_r)
+m1 = [C_p_delta_a C_p_delta_r; C_r_delta_a C_r_delta_r];
+m2_r1 = ((-Gamma_1*p_star*q_star + Gamma_2*q_star*r_star)/(0.5*rho*(Va_star)^2*S*b))- C_p_0 - C_p_beta*beta_star - C_p_p*((b*p_star)/2*Va_star) - C_p_r*((b*r_star/(2*Va_star)));
+m2_r2 = ((-Gamma_7*p_star*q_star + Gamma_1*q_star*r_star)/(0.5*rho*(Va_star)^2*S*b))- C_r_0 - C_r_beta*beta_star - C_r_p*((b*p_star)/2*Va_star) - C_r_r*((b*r_star/(2*Va_star)));
+m2 = [m2_r1;m2_r2];
+a_r_star_matrix = cross(inv(m1),m2);
+del_a_star = a_r_star_matrix(1);
+del_r_star = a_r_star_matrix(2);
 %% Coefficient of Lift
 
 function pos_or_neg = sign(alpha)
@@ -414,9 +418,9 @@ end
 %% Aerodynamic Force Coefficients
 %%% X direction
 function C_X = coeff_X(alpha)
-C_X = -C_D(alpha)*cos(alpha) + C_L(alpha)*sin(alpha);
+C_X = -coeff_D(alpha)*cos(alpha) + coeff_L(alpha)*sin(alpha);
 end
 %%% Z direction
 function C_Z = coeff_Z(alpha)
-C_Z = -C_D(alpha)*sin(alpha) - C_L(alpha)*cos(alpha);
+C_Z = -coeff_D(alpha)*sin(alpha) - coeff_L(alpha)*cos(alpha);
 end

@@ -66,15 +66,22 @@ q0 = 0;
 
 m = 13.5;                            %Mass of the aircraft [kg]
 w = m*g;                          %Weight of the aircraft [N]
-Jx = 0.8244;                         %Moment of inertia x-axis [kg*m^2]
-Jy = 1.135;                         %Moment of inertia y-axis [kg*m^2]
-Jz = 1.759;                         %Moment of inertia z-axis [kg*m^2]
-Jzx = 0.1204;                         %Moment of inertia zx-axis [kg*m^2]
-Jxz = Jzx;                          %Moment of inertia xz-axis [kg*m^2]
+J_x = 0.8244;                         %Moment of inertia x-axis [kg*m^2]
+J_y = 1.135;                         %Moment of inertia y-axis [kg*m^2]
+J_z = 1.759;                         %Moment of inertia z-axis [kg*m^2]
+J_zx = 0.1204;                         %Moment of inertia zx-axis [kg*m^2]
+J_xz = J_zx;                          %Moment of inertia xz-axis [kg*m^2]
 
-Ix_prime = (Jx*Jz-Jzx^2)/Jz;
-Iz_prime = (Jx*Jz-Jzx^2)/Jx;
-Izx_prime = Jzx/(Jx*Jz-Jxz^2);
+Gamma = J_x*J_z - J_xz^2;
+
+Gamma_1 = J_xz*(J_x-J_y+J_z)/Gamma;
+Gamma_2 = (J_z*(J_z-J_y) + J_xz^2)/Gamma;
+Gamma_3 = J_z/Gamma;
+Gamma_4 = J_xz/Gamma;
+Gamma_5 = (J_z - J_x)/J_y;
+Gamma_6 = J_xz/Jy;
+Gamma_7 = (J_x*(J_x-J_y) + J_xz^2)/Gamma;
+Gamma_8 = J_x/Gamma;
 
 % Steady level trim
 u0 = V;                             %Initial velocity [ft/sec]
@@ -183,9 +190,9 @@ Zw = (w0*rho*S)/m * (C_Z_0 + C_Z_alpha*alpha0 + C_Z_delta_e*delta_e0) - (rho*S*u
 Zq = u0 + (rho*V_a0*S*C_Z_q*q0)/4*m;
 %Zw_dot = 1/4*rho*c_bar*S*C_zalpha_dot;
 
-Mu = ((u0*rho*S*c_bar)/Jy)*(C_m0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) - (rho*S*c_bar*C_m_alpha*u0)/2*Jy + (rho*S*c_bar^2 *q0*u0)/(4*Jy*V_a0);
-Mw = ((w0*rho*S*c_bar)/Jy)*(C_m0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) + (rho*S*c_bar*C_m_alpha*u0)/2*Jy + (rho*S*c_bar^2 *q0*u0)/(4*Jy*V_a0);
-Mq = (1/4*rho*V_a0*c_bar^2*S*C_m_q)/Jy;
+Mu = ((u0*rho*S*c_bar)/J_y)*(C_m0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) - (rho*S*c_bar*C_m_alpha*u0)/2*J_y + (rho*S*c_bar^2 *q0*u0)/(4*J_y*V_a0);
+Mw = ((w0*rho*S*c_bar)/J_y)*(C_m0 + C_m_alpha*alpha0 + C_m_delta_e*delta_e0) + (rho*S*c_bar*C_m_alpha*u0)/2*J_y + (rho*S*c_bar^2 *q0*u0)/(4*J_y*V_a0);
+Mq = (1/4*rho*V_a0*c_bar^2*S*C_m_q)/J_y;
 %Mw_dot = 1/4*rho*c_bar^2*S*C_malpha_dot;
 
 %Lateral Dimensional Derivatives
@@ -209,7 +216,7 @@ X_deltat = (rho*S_prop*C_prop*k_motor^2*delta_t0)/m;
 Z_deltae = (C_Z_delta_e*1/2*rho*V_a0^2*S)/m;
 %Z_deltap = C_zdeltap*1/2*rho*u0^2*S;
 
-M_deltae = (C_m_delta_e*1/2*rho*V_a0^2*S*c_bar)/Jy;
+M_deltae = (C_m_delta_e*1/2*rho*V_a0^2*S*c_bar)/J_y;
 %M_deltap = C_mdeltap*1/2*rho*u0^2*S*c_bar;
 
 %Lateral Dimensional Control Derivatives
@@ -267,31 +274,41 @@ B_long = [X_deltae X_deltat;
           0 0;]
       
 %% Lateral Linear Model
-Lat1A = Yv/m;
-Lat2A = Yp/m;
-Lat3A = Yr/m - u0;
-Lat4A = g*cos(theta0);
-Lat5A = Lv/Ix_prime + Izx_prime*Nv;
-Lat6A = Lp/Ix_prime + Izx_prime*Np;
-Lat7A = Lr/Ix_prime + Izx_prime*Nr;
+Lat1A = Y_v;
+Lat2A = Y_p;
+Lat3A = Y_r;
+Lat4A = g*cos(theta0)*cos(phi0);
+Lat1_5A = 0;
+Lat5A = L_v;
+Lat6A = L_p;
+Lat7A = L_r;
 Lat8A = 0;
-Lat9A = Izx_prime*Lv+Nv/Iz_prime;
-Lat10A = Izx_prime*Lp+Np/Iz_prime;
-Lat11A = Izx_prime*Lr+Nr/Iz_prime;
+Lat2_5A = 0;
+Lat9A = N_v;
+Lat10A = N_p;
+Lat11A = N_r;
 Lat12A = 0;
+Lat3_5A = 0;
 Lat13A = 0;
 Lat14A = 1;
-Lat15A = tan(theta0);
-Lat16A = 0;
+Lat15A = cos(phi0)*tan(theta0);
+Lat16A = q0*cos(phi0)*tan(theta0) - r0*sin(phi0)*tan(theta0);
+Lat4_5A = 0;
+Lat5_1A = 0;
+Lat5_2A = 0;
+Lat5_3A = cos(phi0)*1/cos(theta0);
+Lat5_4A = p0*cos(phi0)*1/cos(theta0) - r0*sin(phi0)*1/cos(theta0);
+Lat5_5A = 0;
 
-A_lat = [Lat1A, Lat2A, Lat3A, Lat4A;
-          Lat5A, Lat6A, Lat7A, Lat8A;
-          Lat9A, Lat10A, Lat11A, Lat12A;
-          Lat13A, Lat14A, Lat15A, Lat16A]
+A_lat = [Lat1A, Lat2A, Lat3A, Lat4A Lat1_5A;
+          Lat5A, Lat6A, Lat7A, Lat8A Lat2_5A;
+          Lat9A, Lat10A, Lat11A, Lat12A Lat3_5A;
+          Lat13A, Lat14A, Lat15A, Lat16A Lat4_5A;
+          Lat5_1A Lat5_2A Lat5_3A Lat5_4A Lat5_5A]
       
-B_lat = [Y_deltaa/m                              Y_deltar/m;
-         (L_deltaa/Ix_prime)+Izx_prime*N_deltaa  (L_deltar/Ix_prime)+Izx_prime*N_deltar;
-         (N_deltaa/Iz_prime)+Izx_prime*L_deltaa  (N_deltar/Iz_prime)+Izx_prime*L_deltar;
+B_lat = [Y_delta_a                              Y_delta_r;
+         L_delta_a  L_delta_r;
+         N_delta_a  (N_deltar/Iz_prime)+Izx_prime*L_deltar;
          0                                       0]
 
      

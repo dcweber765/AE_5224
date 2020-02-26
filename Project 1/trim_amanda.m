@@ -48,10 +48,11 @@ e = 0.9; % Oswald efficiency factor
 C_Dp = 0.0437;
 AR = b^2/S; %aspect ratio
 %% Trim
-
+%%%Inputs
 V_a_star = 30;
 gamma_star = 0;
 R_star = inf;
+%%%Other
 % alpha_star = 0;
 % beta_star = 0;
 % delta_e_star = deg2rad(4);
@@ -377,13 +378,21 @@ f = [-m*g*sin(theta);
      m*g*cos(theta)*cos(phi)] 
 
 %% Numerical Computation of Trim
+%%% Postion
+p_x_star = 0;
+p_y_star = 0;
+p_z_star = altt;
+pos_star = [p_x_star; p_y_star; p_z_star];
 %%% Body frame velocities: u*,v*,w*
 u_star = V_a_star*(cos(alpha_star)*cos(beta_star));
 v_star = V_a_star*(sin(beta_star));
 w_star = V_a_star*(sin(alpha_star)*cos(beta_star));
 v_b_star = [u_star; v_star; w_star];
 %%% Pitch angle (with Vw = 0)
+phi_star = 0;
+psi_star = 0;
 theta_star = alpha_star + gamma_star;
+euler_ang_star = [phi_star theta_star psi_star];
 %%% Angular rates (theta* is expressed in terms of gamma*and alpha*)
 p_star = (V_a_star/R_star)*(-sin(theta_star));
 q_star = (V_a_star/R_star)*(sin(phi_star)*cos(theta_star));
@@ -403,11 +412,23 @@ m2 = [m2_r1;m2_r2];
 a_r_star_matrix = cross(inv(m1),m2);
 del_a_star = a_r_star_matrix(1);
 del_r_star = a_r_star_matrix(2);
+%%% f(x_star,u_star)
+x_star = [pos_star v_b_star euler_ang_star pqr_star]; %12 states
+u_star = [del_e_star del_t_star del_a_star del_r_star]; %4 inputs
+
 %% Trim Algorithm
-x_dot_star = [0;0;-V_a_star*sin(gamma_star);0;0;0;0;0; ((V_a_star/R_star)*cos(gamma_star));0;0;0];
+%%% f(x,u)
+% p_x_dot = (cos(theta)*cos(psi))*u+(sin(phi)*sin(theta)*cos(psi)- cos(phi)*sin(psi))*v +...
+%     (cos(phi)*sin(theta)*cos(psi)+sin(phi)*sin(psi))*w_b;
+% p_y_dot = (cos(theta)*sin(psi))*u+(sin(phi)*sin(theta)*sin(psi)+ cos(phi)*cos(psi))*v +...
+%     (cos(phi)*sin(theta)*sin(psi)-sin(phi)*cos(psi))*w_b;
+% p_z_dot = -1*(u_b*sin(theta)-v_b*sin(phi)*cos(theta)-w_b*cos(phi)*cos(theta)); %multiply by -1 b/c book defines h = -p_z
+% u_dot = r*v_b - q*w_b - g*sin(theta)+ ((rho(V_a)^2*S)/(2*m))*(coeff_X(alpha)+ (-C_D_alpha*cos(alpha) + C_L_alpha*sin(alpha))
+% 
+% 
+% x_dot_star = [0;0;-V_a_star*sin(gamma_star);0;0;0;0;0; ((V_a_star/R_star)*cos(gamma_star));0;0;0];
+%%%Algorithm 15
 
-
-[X,U,Y,DX] = TRIM('SYS',X0,U0,Y0,IX,IU,IY,DX0,IDX);
 
 %% Coefficient of Lift
 

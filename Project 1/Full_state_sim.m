@@ -229,7 +229,7 @@ N_delta_r = C_r_delta_r*1/2*rho*V_a_star^2*S*b;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Problem 1 %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% [u,w,q,theta,h]'
+% [u,w,q,theta,pz]'
 Long1A = Xu;                                            %Row 1, Column 1
 Long2A = Xw;                                            %Row 1, Column 2
 Long3A = Xq;                                               %Row 1, Column 3
@@ -250,22 +250,29 @@ Long14A = 0;                                              %Row 4, Column 2
 Long15A = 1;                                              %Row 4, Column 3
 Long16A = 0;                                              %Row 4, Column 4
 Long4_5A = 0;
-Long5_1A = sin(theta_star);
-Long5_2A = -cos(theta_star);
+Long5_1A = -sin(theta_star);
+Long5_2A = cos(theta_star);
 Long5_3A = 0;
-Long5_4A = u_star*cos(theta_star)+w_star*sin(theta_star);
+Long5_4A = u_star*cos(theta_star);
 Long5_5A = 0;
+Long6_1A = cos(theta_star);
+Long6_2A = sin(theta_star);
+Long6_3A = 0;
+Long6_4A = 0;
+Long6_5A = 0;
 
 
-A_long = [Long1A, Long2A, Long3A, Long4A Long1_5A;
-          Long5A, Long6A, Long7A, Long8A Long2_5A;
-          Long9A, Long10A, Long11A, Long12A Long3_5A;
-          Long13A, Long14A, Long15A, Long16A Long4_5A;
-          Long5_1A Long5_2A Long5_3A Long5_4A Long5_5A]
+A_long = [Long1A, Long2A, Long3A, Long4A Long1_5A 0;
+          Long5A, Long6A, Long7A, Long8A Long2_5A 0;
+          Long9A, Long10A, Long11A, Long12A Long3_5A 0;
+          Long13A, Long14A, Long15A, Long16A Long4_5A 0;
+          Long5_1A Long5_2A Long5_3A Long5_4A Long5_5A 0;
+          Long6_1A Long6_2A Long6_3A Long6_4A Long6_5A 0]
       
 B_long = [X_delta_e X_delta_t;
           Z_delta_e 0;
           M_delta_e 0;
+          0 0;
           0 0;
           0 0;]
       
@@ -295,16 +302,20 @@ Lat5_2A = 0;
 Lat5_3A = cos(phi_star)*1/cos(theta_star);
 Lat5_4A = p_star*cos(phi_star)*1/cos(theta_star) - r_star*sin(phi_star)*1/cos(theta_star);
 Lat5_5A = 0;
+Lat6_1A = 1;
+Lat6_5A = u_star*cos(theta_star);
 
-A_lat = [Lat1A, Lat2A, Lat3A, Lat4A Lat1_5A;
-          Lat5A, Lat6A, Lat7A, Lat8A Lat2_5A;
-          Lat9A, Lat10A, Lat11A, Lat12A Lat3_5A;
-          Lat13A, Lat14A, Lat15A, Lat16A Lat4_5A;
-          Lat5_1A Lat5_2A Lat5_3A Lat5_4A Lat5_5A];
+A_lat = [Lat1A, Lat2A, Lat3A, Lat4A Lat1_5A 0;
+          Lat5A, Lat6A, Lat7A, Lat8A Lat2_5A 0;
+          Lat9A, Lat10A, Lat11A, Lat12A Lat3_5A 0;
+          Lat13A, Lat14A, Lat15A, Lat16A Lat4_5A 0;
+          Lat5_1A Lat5_2A Lat5_3A Lat5_4A Lat5_5A 0;
+          Lat6_1A 0 0 0 Lat6_5A 0];
       
 B_lat = [Y_delta_a Y_delta_r;
          L_delta_a  L_delta_r;
          N_delta_a  N_delta_r;
+         0 0;
          0 0;
          0 0];
 
@@ -313,44 +324,44 @@ B_lat = [Y_delta_a Y_delta_r;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Inputs
-% Delta_del_a
-% Delta_del_p
-% Delta_del_r_r
-% Delta_del_r_l
-
-[el_rud] = [1 1; -1 1]*[del_r_r; del_r_l];
-
-Delta_del_e = el_rud(1);
-Delta_del_r = el_rud(2);
-
-Delta_X_long = [Delta_u_t; Delta_w_t; Delta_q; Delta_theta; Delta_p_z];
-
-Delta_X_lat = [Delta_v_t; Delta_p; Delta_r; Delta_phi; Delta_psi];
-     
-Delta_U_long = [Delta_delta_e; Delta_delta_p];
-
-Delta_U_lat = [Delta_delta_a; Delta_delta_r];
-     
-Delta_X_dot_long = A_long*Delta_X_long + B_long*Delta_U_long
-
-Delta_X_dot_lat = A_lat*Delta_X_lat + B_lat*Delta_U_lat
-
-Delta_X_long_plus = Delta_X_dot_long*dT
-Delta_X_lat_plus = Delta_X_dot_lat*dT
-
-Delta_X = [Delta_X_long_plus(1)*dT;...
-           Delta_X_lat_plus(1)*dT;...
-           Delta_X_long_plus(5);...
-           Delta_X_long_plus(1);...
-           Delta_X_lat_plus(1);...
-           Delta_X_long_plus(2);...];
+% del_a = 0;
+% del_p =.75;
+% del_r_r = 0;
+% del_r_l = 0;
+% 
+% [el_rud] = [1 1; -1 1]*[del_r_r; del_r_l];
+% 
+% Delta_del_e = el_rud(1);
+% Delta_del_r = el_rud(2);
+% 
+% Delta_X_long = [Delta_u_t; Delta_w_t; Delta_q; Delta_theta; Delta_p_z];
+% 
+% Delta_X_lat = [Delta_v_t; Delta_p; Delta_r; Delta_phi; Delta_psi];
+%      
+% Delta_U_long = [Delta_delta_e; Delta_delta_p];
+% 
+% Delta_U_lat = [Delta_delta_a; Delta_delta_r];
+%      
+% Delta_X_dot_long = A_long*Delta_X_long + B_long*Delta_U_long
+% 
+% Delta_X_dot_lat = A_lat*Delta_X_lat + B_lat*Delta_U_lat
+% 
+% Delta_X_long_plus = Delta_X_dot_long*dT
+% Delta_X_lat_plus = Delta_X_dot_lat*dT
+% 
+% Delta_X = [Delta_X_long_plus(1)*dT;...
+%            Delta_X_lat_plus(1)*dT;...
+%            Delta_X_long_plus(5);...
+%            Delta_X_long_plus(1);...
+%            Delta_X_lat_plus(1);...
+%            Delta_X_long_plus(2);];
            
            
-Long_sys = ss(A_long,B_long,eye(5),0);
-Lat_sys = ss(A_lat,B_lat,zeros(5,5),0);
-x0 = [0;0;0;0;0]
-t = linspace(0,1,100);
-u  = [delta_e_star*ones(1,100); delta_t_star*ones(1,100)];
+Long_sys = ss(A_long,B_long,eye(6),0);
+Lat_sys = ss(A_lat,B_lat,eye(6),0);
+x0 = [u_star;w_star;q_star;theta_star;altt;0]
+t = linspace(0,1.5,100);
+u  = [0*ones(1,100); 0*ones(1,100)]; %delta_e_star delta_t_star
 lsim(Long_sys, u, t, x0)
 
 % 

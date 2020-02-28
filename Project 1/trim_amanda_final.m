@@ -215,8 +215,8 @@ gamma_star = 0; %rad
 %fsolve
 IGs = [alpha_ig 0 0];
 trim_alpha_beta_phi = fsolve(@trim_solver_condition_1, IGs);
-alpha_star = trim_alpha_beta_phi(1);
-beta_star = trim_alpha_beta_phi(2);
+alpha_star = trim_alpha_beta_phi(1)
+beta_star = trim_alpha_beta_phi(2)
 phi_star = trim_alpha_beta_phi(3);
 % trim states
 ts = trim_states(V_a_star,R_star,gamma_star,alpha_star,beta_star,phi_star);

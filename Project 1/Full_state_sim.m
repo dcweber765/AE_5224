@@ -57,18 +57,18 @@ V = 30;                            %True airspeed [m/sec]
 %% Trim
 
 V_a_star = 30;
-alpha_star = 0;
+alpha_star = 0.0382;
 beta_star = 0;
-delta_e_star = deg2rad(4);
-delta_t_star = 0;
+delta_e_star = -.0758;
+delta_t_star = .3955;
 delta_a_star = 0;
 delta_r_star = 0;
 
-u_star = V;                             %Initial velocity [ft/sec]
+u_star = 29.9781;                             %Initial velocity [ft/sec]
 v_star = 0;
-w_star = 0;
+w_star = 1.1451;
 
-p_star = 0;
+p_star = .0382;
 q_star = 0;
 r_star = 0;
 
@@ -318,37 +318,40 @@ B_lat = [Y_delta_a Y_delta_r;
 % Delta_del_r_r
 % Delta_del_r_l
 
-% [el_rud] = [1 1; -1 1]*[del_r_r; del_r_l];
-% 
-% Delta_del_e = el_rud(1);
-% Delta_del_r = el_rud(2);
-% 
-% Delta_X_long = [Delta_u_t; Delta_w_t; Delta_q; Delta_theta; Delta_p_z];
-% 
-% Delta_X_lat = [Delta_v_t; Delta_p; Delta_r; Delta_phi; Delta_psi];
-%      
-% Delta_U_long = [Delta_delta_e; Delta_delta_p];
-% 
-% Delta_U_lat = [Delta_delta_a; Delta_delta_r];
-%      
-% Delta_X_dot_long = A_long*Delta_X_long + B_long*Delta_U_long
-% 
-% Delta_X_dot_lat = A_lat*Delta_X_lat + B_lat*Delta_U_lat
-% 
-% Delta_X_long_plus = Delta_X_dot_long*dT
-% Delta_X_lat_plus = Delta_X_dot_lat*dT
-% 
-% Delta_X = [Delta_X_long_plus(1)*dT;...
-%            Delta_X_lat_plus(1)*dT;...
-%            Delta_X_long_plus(5);...
-%            Delta_X_long_plus(1);...
-%            Delta_X_lat_plus(1);...
-%            Delta_X_long_plus(2);...
-           
-           
-Long_sys = ss(A_long,B_long,zeros(5,5),0);
-Lat_sys = ss(A_lat,B_lat,zeros(5,5),0);
+[el_rud] = [1 1; -1 1]*[del_r_r; del_r_l];
 
+Delta_del_e = el_rud(1);
+Delta_del_r = el_rud(2);
+
+Delta_X_long = [Delta_u_t; Delta_w_t; Delta_q; Delta_theta; Delta_p_z];
+
+Delta_X_lat = [Delta_v_t; Delta_p; Delta_r; Delta_phi; Delta_psi];
+     
+Delta_U_long = [Delta_delta_e; Delta_delta_p];
+
+Delta_U_lat = [Delta_delta_a; Delta_delta_r];
+     
+Delta_X_dot_long = A_long*Delta_X_long + B_long*Delta_U_long
+
+Delta_X_dot_lat = A_lat*Delta_X_lat + B_lat*Delta_U_lat
+
+Delta_X_long_plus = Delta_X_dot_long*dT
+Delta_X_lat_plus = Delta_X_dot_lat*dT
+
+Delta_X = [Delta_X_long_plus(1)*dT;...
+           Delta_X_lat_plus(1)*dT;...
+           Delta_X_long_plus(5);...
+           Delta_X_long_plus(1);...
+           Delta_X_lat_plus(1);...
+           Delta_X_long_plus(2);...];
+           
+           
+Long_sys = ss(A_long,B_long,eye(5),0);
+Lat_sys = ss(A_lat,B_lat,zeros(5,5),0);
+x0 = [0;0;0;0;0]
+t = linspace(0,1,100);
+u  = [delta_e_star*ones(1,100); delta_t_star*ones(1,100)];
+lsim(Long_sys, u, t, x0)
 
 % 
 % f = [-m*g*sin(theta);

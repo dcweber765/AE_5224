@@ -73,7 +73,7 @@ q_star = 0;
 r_star = 0;
 
 psi_star = 0;
-theta_star = deg2rad(0);                %Initial pitch angle [rad]
+theta_star = 0.0382;                %Initial pitch angle [rad]
 phi_star = 0;
 
 % Mass and Inertial Data
@@ -310,14 +310,14 @@ A_lat = [Lat1A, Lat2A, Lat3A, Lat4A Lat1_5A 0;
           Lat9A, Lat10A, Lat11A, Lat12A Lat3_5A 0;
           Lat13A, Lat14A, Lat15A, Lat16A Lat4_5A 0;
           Lat5_1A Lat5_2A Lat5_3A Lat5_4A Lat5_5A 0;
-          Lat6_1A 0 0 0 Lat6_5A 0];
+          Lat6_1A 0 0 0 Lat6_5A 0]
       
 B_lat = [Y_delta_a Y_delta_r;
          L_delta_a  L_delta_r;
          N_delta_a  N_delta_r;
          0 0;
          0 0;
-         0 0];
+         0 0]
 
      
 %f_p_x = .5*rho*S_prop*C_prop*((k_motor*del_t)^2 - V_a^2);

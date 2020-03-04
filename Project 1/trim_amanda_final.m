@@ -20,12 +20,12 @@ V = 30;                            %True airspeed [m/sec]
 V_a_star = 30; %m/s
 R_star = inf;
 gamma_star = 0;
-theta_star = deg2rad(4); 
+theta_star = 0.0382; 
 psi_star = 0;
 phi_star = 0; 
-u_star = 0;
+u_star = 29.9781;
 v_star = 0;
-w_star = 0;
+w_star = 1.1451;
 p_star = 0;
 q_star = 0;
 r_star = 0;
@@ -163,7 +163,7 @@ C_Z_q = -C_D_q*sin(alpha_star)-C_L_q*cos(alpha_star);
 C_Z_del_e = -C_D_delta_e*sin(alpha_star) - C_L_delta_e*cos(alpha_star);
 
 %% Longitudinal Dimensional Derivatives
-Xu = ((u_star*rho_star*S)/m)*((C_X_0 + C_X_alpha*alpha_star + C_X_delta_e*delta_e_star) - ((rho_star*S*w_star*C_X_alpha)/(2*m)) + ((rho_star*S*c*C_X_q*u_star*q_star)/4*m*V_a_star) - ((rho_star*S_prop*C_prop*u_star)/m));
+Xu = ((u_star*rho_star*S)/m)*((C_X_0 + C_X_alpha*alpha_star + C_X_delta_e*delta_e_star) - ((rho_star*S*w_star*C_X_alpha)/(2*m)) + ((rho_star*S*c*C_X_q*u_star*q_star)/4*m*V_a_star) - ((rho_star*S_prop*C_prop*u_star)/m))
 Xw = -q_star + ((w_star*rho_star*S)/m) * (C_X_0 + C_X_alpha*alpha_star + C_X_delta_e*delta_e_star) + ((rho_star*S*c*C_X_q*w_star*q_star)/4*m*V_a_star) + ((rho_star*S*u_star*C_X_alpha)/2*m) - ((rho_star*S_prop*C_prop*w_star)/m);
 Xq = -w_star + ((rho_star*V_a_star*c*S*C_X_q)/4*m);
 
@@ -242,76 +242,76 @@ trim_controlinputs = [delta_e_star delta_p_star delta_a_star delta_r_star]'
 [A_lat,B_lat] = lateral_linear_model(Yv,Yp,Yr,Lv,Lp,Lr,Nv,Np,Nr,Y_delta_a,Y_delta_r,L_delta_a,L_delta_r,N_delta_a,N_delta_r,theta_star,phi_star,p_star,q_star,r_star,g);
 Along_eigenvectors = eig(A_long)
 Alat_eigenvectors = eig(A_lat)
-%% trim_solver_condition_2
-% "Constant speed, constant altitude turn"
-V_a_star = 30; %m/s
-R_star = 150; %m
-gamma_star = 0; %rad
-%fsolve
-IGs = [alpha_ig 0 0];
-trim_alpha_beta_phi = fminunc(@trim_solver_condition_2, IGs);
-alpha_star = trim_alpha_beta_phi(1);
-beta_star = trim_alpha_beta_phi(2);
-phi_star = trim_alpha_beta_phi(3);
-% trim states
-ts = trim_states(V_a_star,R_star,gamma_star,alpha_star,beta_star,phi_star);
-u_star = ts(1);
-v_star = ts(2);
-w_star = ts(3);
-theta_star = ts(4);
-p_star = ts(5);
-q_star = ts(6);
-r_star = ts(7);
-trim_states_x_star_2 = [u_star, v_star, w_star, theta_star, p_star, q_star, r_star]';
-%trim control inputs
-tci = trim_control_inputs(alpha_star,beta_star,g,V_a_star,rho_star,J_x,J_z,J_xz,c,m,b,S,k_motor,S_prop,C_prop,v_star,w_star,C_m_0, C_m_alpha,C_m_q,C_m_delta_e,C_p_r,C_r_r,C_X,C_X_q,C_X_del_e,theta_star,p_star,q_star,r_star,C_p_delta_a,C_p_delta_r, C_r_delta_a,C_r_delta_r,C_p_0,C_r_0,C_p_p,C_r_p,C_p_beta,C_r_beta,Gamma_1,Gamma_2,Gamma_7);
-delta_e_star = tci(1);
-delta_p_star = tci(2);
-delta_a_star = tci(3);
-delta_r_star = tci(4);
-trim_control_inputs_2 = [delta_e_star, delta_p_star, delta_a_star, delta_r_star]';
-fprintf('Trim Condition: 2')
-trim_state_x_star = [u_star v_star w_star theta_star p_star q_star r_star]'
-trim_controlinputs = [delta_e_star delta_p_star delta_a_star delta_r_star]'
-[A_long,B_long] = longitudinal_linear_model(Xu, Xw, Xq, Zu, Zw, Zq, Mu, Mw, Mq, X_delta_e, X_delta_t,Z_delta_e, M_delta_e, g, u_star, w_star, theta_star);
-[A_lat,B_lat] = lateral_linear_model(Yv,Yp,Yr,Lv,Lp,Lr,Nv,Np,Nr,Y_delta_a,Y_delta_r,L_delta_a,L_delta_r,N_delta_a,N_delta_r,theta_star,phi_star,p_star,q_star,r_star,g);
-Along_eigenvectors = eig(A_long)
-Alat_eigenvectors = eig(A_lat)
-%% trim_solver_condition_3
-% "Constant speed climbing turn"
-V_a_star = 30; %m/s
-R_star = 150; %m
-gamma_star = deg2rad(3); %rad
-%fsolve
-% phi_ig = asin(R_star*L/(m*V_a_star^2));
-IGs = [alpha_ig 0 0];
-trim_alpha_beta_phi = fminunc(@trim_solver_condition_3, IGs);
-alpha_star = trim_alpha_beta_phi(1);
-beta_star = trim_alpha_beta_phi(2);
-phi_star = trim_alpha_beta_phi(3);
-% trim states
-ts = trim_states(V_a_star,R_star,gamma_star,alpha_star,beta_star,phi_star);
-u_star = ts(1);
-v_star = ts(2);
-w_star = ts(3);
-theta_star = ts(4);
-p_star = ts(5);
-q_star = ts(6);
-r_star = ts(7);
-trim_states_x_star_3 = [u_star, v_star, w_star, theta_star, p_star, q_star, r_star]';
-%trim control inputs
-tci = trim_control_inputs(alpha_star,beta_star,g,V_a_star,rho_star,J_x,J_z,J_xz,c,m,b,S,k_motor,S_prop,C_prop,v_star,w_star,C_m_0, C_m_alpha,C_m_q,C_m_delta_e,C_p_r,C_r_r,C_X,C_X_q,C_X_del_e,theta_star,p_star,q_star,r_star,C_p_delta_a,C_p_delta_r, C_r_delta_a,C_r_delta_r,C_p_0,C_r_0,C_p_p,C_r_p,C_p_beta,C_r_beta,Gamma_1,Gamma_2,Gamma_7);
-delta_e_star = tci(1);
-delta_p_star = tci(2);
-delta_a_star = tci(3);
-delta_r_star = tci(4);
-trim_control_inputs_3 = [delta_e_star, delta_p_star, delta_a_star, delta_r_star]';fprintf('Trim Condition: 3')
-trim_state_x_star = [u_star v_star w_star theta_star p_star q_star r_star]'
-trim_controlinputs = [delta_e_star delta_p_star delta_a_star delta_r_star]'
-[A_long,B_long] = longitudinal_linear_model(Xu, Xw, Xq, Zu, Zw, Zq, Mu, Mw, Mq, X_delta_e, X_delta_t,Z_delta_e, M_delta_e, g, u_star, w_star, theta_star);
-[A_lat,B_lat] = lateral_linear_model(Yv,Yp,Yr,Lv,Lp,Lr,Nv,Np,Nr,Y_delta_a,Y_delta_r,L_delta_a,L_delta_r,N_delta_a,N_delta_r,theta_star,phi_star,p_star,q_star,r_star,g);
-Along_eigenvectors = eig(A_long)
-Alat_eigenvectors = eig(A_lat)
+% %% trim_solver_condition_2
+% % "Constant speed, constant altitude turn"
+% V_a_star = 30; %m/s
+% R_star = 150; %m
+% gamma_star = 0; %rad
+% %fsolve
+% IGs = [alpha_ig 0 0];
+% trim_alpha_beta_phi = fminunc(@trim_solver_condition_2, IGs);
+% alpha_star = trim_alpha_beta_phi(1);
+% beta_star = trim_alpha_beta_phi(2);
+% phi_star = trim_alpha_beta_phi(3);
+% % trim states
+% ts = trim_states(V_a_star,R_star,gamma_star,alpha_star,beta_star,phi_star);
+% u_star = ts(1);
+% v_star = ts(2);
+% w_star = ts(3);
+% theta_star = ts(4);
+% p_star = ts(5);
+% q_star = ts(6);
+% r_star = ts(7);
+% trim_states_x_star_2 = [u_star, v_star, w_star, theta_star, p_star, q_star, r_star]';
+% %trim control inputs
+% tci = trim_control_inputs(alpha_star,beta_star,g,V_a_star,rho_star,J_x,J_z,J_xz,c,m,b,S,k_motor,S_prop,C_prop,v_star,w_star,C_m_0, C_m_alpha,C_m_q,C_m_delta_e,C_p_r,C_r_r,C_X,C_X_q,C_X_del_e,theta_star,p_star,q_star,r_star,C_p_delta_a,C_p_delta_r, C_r_delta_a,C_r_delta_r,C_p_0,C_r_0,C_p_p,C_r_p,C_p_beta,C_r_beta,Gamma_1,Gamma_2,Gamma_7);
+% delta_e_star = tci(1);
+% delta_p_star = tci(2);
+% delta_a_star = tci(3);
+% delta_r_star = tci(4);
+% trim_control_inputs_2 = [delta_e_star, delta_p_star, delta_a_star, delta_r_star]';
+% fprintf('Trim Condition: 2')
+% trim_state_x_star = [u_star v_star w_star theta_star p_star q_star r_star]'
+% trim_controlinputs = [delta_e_star delta_p_star delta_a_star delta_r_star]'
+% [A_long,B_long] = longitudinal_linear_model(Xu, Xw, Xq, Zu, Zw, Zq, Mu, Mw, Mq, X_delta_e, X_delta_t,Z_delta_e, M_delta_e, g, u_star, w_star, theta_star);
+% [A_lat,B_lat] = lateral_linear_model(Yv,Yp,Yr,Lv,Lp,Lr,Nv,Np,Nr,Y_delta_a,Y_delta_r,L_delta_a,L_delta_r,N_delta_a,N_delta_r,theta_star,phi_star,p_star,q_star,r_star,g);
+% Along_eigenvectors = eig(A_long)
+% Alat_eigenvectors = eig(A_lat)
+% %% trim_solver_condition_3
+% % "Constant speed climbing turn"
+% V_a_star = 30; %m/s
+% R_star = 150; %m
+% gamma_star = deg2rad(3); %rad
+% %fsolve
+% % phi_ig = asin(R_star*L/(m*V_a_star^2));
+% IGs = [alpha_ig 0 0];
+% trim_alpha_beta_phi = fminunc(@trim_solver_condition_3, IGs);
+% alpha_star = trim_alpha_beta_phi(1);
+% beta_star = trim_alpha_beta_phi(2);
+% phi_star = trim_alpha_beta_phi(3);
+% % trim states
+% ts = trim_states(V_a_star,R_star,gamma_star,alpha_star,beta_star,phi_star);
+% u_star = ts(1);
+% v_star = ts(2);
+% w_star = ts(3);
+% theta_star = ts(4);
+% p_star = ts(5);
+% q_star = ts(6);
+% r_star = ts(7);
+% trim_states_x_star_3 = [u_star, v_star, w_star, theta_star, p_star, q_star, r_star]';
+% %trim control inputs
+% tci = trim_control_inputs(alpha_star,beta_star,g,V_a_star,rho_star,J_x,J_z,J_xz,c,m,b,S,k_motor,S_prop,C_prop,v_star,w_star,C_m_0, C_m_alpha,C_m_q,C_m_delta_e,C_p_r,C_r_r,C_X,C_X_q,C_X_del_e,theta_star,p_star,q_star,r_star,C_p_delta_a,C_p_delta_r, C_r_delta_a,C_r_delta_r,C_p_0,C_r_0,C_p_p,C_r_p,C_p_beta,C_r_beta,Gamma_1,Gamma_2,Gamma_7);
+% delta_e_star = tci(1);
+% delta_p_star = tci(2);
+% delta_a_star = tci(3);
+% delta_r_star = tci(4);
+% trim_control_inputs_3 = [delta_e_star, delta_p_star, delta_a_star, delta_r_star]';fprintf('Trim Condition: 3')
+% trim_state_x_star = [u_star v_star w_star theta_star p_star q_star r_star]'
+% trim_controlinputs = [delta_e_star delta_p_star delta_a_star delta_r_star]'
+% [A_long,B_long] = longitudinal_linear_model(Xu, Xw, Xq, Zu, Zw, Zq, Mu, Mw, Mq, X_delta_e, X_delta_t,Z_delta_e, M_delta_e, g, u_star, w_star, theta_star);
+% [A_lat,B_lat] = lateral_linear_model(Yv,Yp,Yr,Lv,Lp,Lr,Nv,Np,Nr,Y_delta_a,Y_delta_r,L_delta_a,L_delta_r,N_delta_a,N_delta_r,theta_star,phi_star,p_star,q_star,r_star,g);
+% Along_eigenvectors = eig(A_long)
+% Alat_eigenvectors = eig(A_lat)
 
 
 

@@ -1,4 +1,5 @@
-clear all
+clear variables
+close all
 
 S = .55;                            %Wing surface area [m^2]
 c_bar = 0.18994;                          %Mean Aerodynamic Chord (MAC) [m]
@@ -112,18 +113,18 @@ C_Y_0 = 0;
 C_Y_beta = -0.98;
 C_Y_p = 0;
 C_Y_r = 0;
-C_n_0 = 0;
-C_n_beta = 0.25;
-C_n_p = 0.022;
-C_n_r = -0.35;
+C_N_0 = 0;
+C_N_beta = 0.25;
+C_N_p = 0.022;
+C_N_r = -0.35;
 
 % Control Derivatives
 C_l_delta_a = 0.08;
 C_l_delta_r = 0.105;
 C_Y_delta_a = 0;
 C_Y_delta_r = -0.17;
-C_n_delta_a = 0.06;
-C_n_delta_r = -0.032;
+C_N_delta_a = 0.06;
+C_N_delta_r = -0.032;
 
 
 Q_star_S = .5*rho_star*V_star*S;
@@ -147,7 +148,7 @@ X_delta_t = rho_star*S_prop*C_prop*k_motor^2*delta_t_star;
 Z_delta_t = 0;
 %M_delta_t = Q_star_S*V_star*c_bar*C_M_delta_t;
 
-
+%% Long
 M_prime = M_w_dot/(m - Z_w_dot);
 
 ALong_1_1 = X_u/m;
@@ -199,7 +200,7 @@ BLong_2_1 = Z_delta_e/(m - Z_w_dot);
 BLong_2_2 = Z_delta_t/(m - Z_w_dot);
 
 BLong_3_1 = M_delta_e/J_y + ((M_w_dot*Z_delta_e)/(J_y*(m - Z_w_dot)));
-BLong_3_2 = 0;%C_M_delta_t/J_y + ((M_w_dot*Z_delta_t)/(J_y*(m - Z_w_dot)));
+BLong_3_2 = 0;%M_delta_t/J_y + ((M_w_dot*Z_delta_t)/(J_y*(m - Z_w_dot)));
 
 BLong_4_1 = 0;
 BLong_4_2 = 0;
@@ -224,10 +225,193 @@ BLong = [BLong_1_1 BLong_1_2;...
          BLong_4_1 BLong_4_2;...  
          BLong_5_1 BLong_5_2;...  
          BLong_6_1 BLong_6_2];  
-     
-Long_sys = ss(ALong,BLong,eye(6),0);     
-x0 = [.1;0;0;0;10;0]
+
+%% Lat
+
+Y_v = Q_star_S*C_Y_beta;
+Y_p = .5*Q_star_S*C_Y_p;
+Y_r = .5*Q_star_S*b*C_Y_r;
+l_v = Q_star_S*b*C_l_beta;
+l_p = Q_star_S*b^2*C_l_p;
+l_r = .5*Q_star_S*b^2*C_l_r;
+N_v = Q_star_S*b*C_N_beta;
+N_p = .5*Q_star_S*b^2*C_N_p;
+N_r = .5*Q_star_S*b^2*C_N_r;
+
+Y_delta_a = Q_star_S*V_star*C_Y_delta_a;
+Y_delta_r = Q_star_S*V_star*C_Y_delta_r;
+
+l_delta_a = Q_star_S*V_star*b*C_l_delta_a;
+l_delta_r = Q_star_S*V_star*b*C_l_delta_r;
+ 
+N_delta_a = Q_star_S*V_star*b*C_N_delta_a;
+N_delta_r = Q_star_S*V_star*b*C_N_delta_r;
+
+J_x_prime = (J_x*J_z-J_zx^2)/J_z;
+J_z_prime = (J_x*J_z-J_zx^2)/J_x;
+J_zx_prime = J_zx/(J_x*J_z-J_xz^2);
+
+ALat_1_1 = Y_v/m;
+ALat_1_2 = Y_p/m;
+ALat_1_3 = -V_star + Y_r/m;
+ALat_1_4 = g*cos(theta_star);
+ALat_1_5 = 0;
+ALat_1_6 = 0;
+
+ALat_2_1 = l_v/J_x_prime + J_zx_prime*N_v;
+ALat_2_2 = l_p/J_x_prime + J_zx_prime*N_p;
+ALat_2_3 = l_r/J_x_prime + J_zx_prime*N_r;
+ALat_2_4 = 0;
+ALat_2_5 = 0;
+ALat_2_6 = 0;
+
+ALat_3_1 = N_v/J_z_prime + J_zx_prime*l_v;
+ALat_3_2 = N_p/J_z_prime + J_zx_prime*l_p;
+ALat_3_3 = N_r/J_z_prime + J_zx_prime*l_r;
+ALat_3_4 = 0;
+ALat_3_5 = 0;
+ALat_3_6 = 0;
+
+ALat_4_1 = 0;
+ALat_4_2 = 1;
+ALat_4_3 = tan(theta_star);
+ALat_4_4 = 0;
+ALat_4_5 = 0;
+ALat_4_6 = 0;
+
+ALat_5_1 = 0;
+ALat_5_2 = 0;
+ALat_5_3 = sec(theta_star);
+ALat_5_4 = 0;
+ALat_5_5 = 0;
+ALat_5_6 = 0;
+
+ALat_6_1 = 1;
+ALat_6_2 = 0;
+ALat_6_3 = 0;
+ALat_6_4 = 0;
+ALat_6_5 = V_star*cos(theta_star);
+ALat_6_6 = 0;
+
+
+BLat_1_1 = Y_delta_a/m;
+BLat_1_2 = Y_delta_r/m;
+
+BLat_2_1 = l_delta_a/J_x_prime + J_zx_prime*N_delta_a;
+BLat_2_2 = l_delta_r/J_x_prime + J_zx_prime*N_delta_r;
+
+BLat_3_1 = N_delta_a/J_z_prime + J_zx_prime*l_delta_a;
+BLat_3_2 = N_delta_r/J_z_prime + J_zx_prime*l_delta_r;
+
+BLat_4_1 = 0;
+BLat_4_2 = 0;
+
+BLat_5_1 = 0;
+BLat_5_2 = 0;
+
+BLat_6_1 = 0;
+BLat_6_2 = 0;
+
+ALat = [ALat_1_1 ALat_1_2 ALat_1_3 ALat_1_4 ALat_1_5 ALat_1_6;...
+         ALat_2_1 ALat_2_2 ALat_2_3 ALat_2_4 ALat_2_5 ALat_2_6;...
+         ALat_3_1 ALat_3_2 ALat_3_3 ALat_3_4 ALat_3_5 ALat_3_6;...
+         ALat_4_1 ALat_4_2 ALat_4_3 ALat_4_4 ALat_4_5 ALat_4_6;...
+         ALat_5_1 ALat_5_2 ALat_5_3 ALat_5_4 ALat_5_5 ALat_5_6;...
+         ALat_6_1 ALat_6_2 ALat_6_3 ALat_6_4 ALat_6_5 ALat_6_6]
+
+BLat = [BLat_1_1 BLat_1_2;...
+         BLat_2_1 BLat_2_2;...  
+         BLat_3_1 BLat_3_2;...  
+         BLat_4_1 BLat_4_2;...  
+         BLat_5_1 BLat_5_2;...  
+         BLat_6_1 BLat_6_2];  
+
+eigLong = eig(ALong)
+eigLat = eig(ALat)
+
+Long_sys = ss(ALong,BLong,eye(6),0);
+Lat_sys = ss(ALat,BLat,eye(6),0);
+x0_Long = [.01;0;0;0;.1;0];
+x0_Lat = [0;0;0;0;.01;0];
 %t = linspace(0,300,600);
 %u  = [delta_e_star*ones(1,600); delta_t_star*ones(1,600)]; %delta_e_star delta_t_star
-figure; initial(Long_sys,x0,200)
+figure; initial(Long_sys,x0_Long)
+figure; initial(Lat_sys,x0_Lat)
 %lsim(Long_sys, u, t, x0)
+[t_sim_long, x_long] = ode45(@(t,x) ALong*x, [0 400], [1 0 0 0 0 0]'); 
+[t_sim_lat, x_lat] = ode45(@(t,x) ALat*x, [0 400], [0 1*pi/180 0 0 0 0]');
+
+figure('Name', 'Longitudinal Stick-Fixed Response')
+subplot(511)
+plot(t_sim_long, x_long(:,1))
+xlabel('t (s)'); ylabel('\Delta u ft/s'); grid on;
+
+subplot(512)
+plot(t_sim_long, x_long(:,2))
+xlabel('t (s)'); ylabel('\Delta w ft/s'); grid on;
+
+subplot(513)
+plot(t_sim_long, x_long(:, 3)*180/pi)
+xlabel('t (s)'); ylabel('\Delta q (\circ/s)'); grid on;
+
+subplot(514)
+plot(t_sim_long, x_long(:, 4)*180/pi)
+xlabel('t (s)'); ylabel('\Delta \theta (\circ)'); grid on;
+
+subplot(515)
+plot(t_sim_long, x_long(:,5))
+xlabel('t (s)'); ylabel('\Delta z_E ft'); grid on; 
+
+
+figure('Name', 'Lateral stick fixed');
+subplot(511)
+plot(t_sim_lat, x_lat(:, 1))
+xlabel('t (s)'); ylabel('v ft/s'); grid on;
+
+subplot(512)
+plot(t_sim_lat, x_lat(:, 2)*180/pi)
+xlabel('t (s)'); ylabel('p (\circ/s)'); grid on;
+
+
+subplot(513)
+plot(t_sim_lat, x_lat(:, 3)*180/pi)
+xlabel('t (s)'); ylabel('r (\circ/s)'); grid on;
+
+
+subplot(514)
+plot(t_sim_lat, x_lat(:, 4)*180/pi)
+xlabel('t (s)'); ylabel('\phi (\circ)'); grid on; 
+
+subplot(515)
+plot(t_sim_lat, x_lat(:,5))
+xlabel('t (s)'); ylabel('\Delta z_E ft'); grid on;
+
+
+     
+p_x = x_long(:,5);
+p_y = x_lat(:,6);
+p_z = x_long(:,6);
+u_b = x_long(:,1);
+v_b = x_lat(:,1);
+w_b = x_long(:,2);
+u_t = 0;
+v_t = 0;
+w_t = 0;
+V = sqrt(u_t.^2 .* v_t.^2 .* w_t^2);
+alpha = atan(w_b./u_b);
+beta = asin(v_b./V);
+psi = x_lat(:,5);
+theta = x_long(:,4);
+phi = x_lat(:,4);
+p = x_lat(:,2);
+q = x_long(:,3);
+r = x_lat(:,3);
+
+p_t = [p_x p_y p_z];
+V_t = [u_t v_t w_t];
+V_b = [u_b v_b w_b];
+euler_ang = [psi theta phi];
+omega_tb_b = [p q r];
+
+X = [p_t V_t V_b V euler_ang omega_tb_b]' %alpha;beta;
+

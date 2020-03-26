@@ -207,24 +207,24 @@ BLong_4_2 = 0;
 
 BLong_5_1 = 0;
 BLong_5_2 = 0;
- 
+
 BLong_6_1 = 0;
 BLong_6_2 = 0;
 
 
 ALong = [ALong_1_1 ALong_1_2 ALong_1_3 ALong_1_4 ALong_1_5 ALong_1_6;...
-         ALong_2_1 ALong_2_2 ALong_2_3 ALong_2_4 ALong_2_5 ALong_2_6;...
-         ALong_3_1 ALong_3_2 ALong_3_3 ALong_3_4 ALong_3_5 ALong_3_6;...
-         ALong_4_1 ALong_4_2 ALong_4_3 ALong_4_4 ALong_4_5 ALong_4_6;...
-         ALong_5_1 ALong_5_2 ALong_5_3 ALong_5_4 ALong_5_5 ALong_5_6;...
-         ALong_6_1 ALong_6_2 ALong_6_3 ALong_6_4 ALong_6_5 ALong_6_6]
+    ALong_2_1 ALong_2_2 ALong_2_3 ALong_2_4 ALong_2_5 ALong_2_6;...
+    ALong_3_1 ALong_3_2 ALong_3_3 ALong_3_4 ALong_3_5 ALong_3_6;...
+    ALong_4_1 ALong_4_2 ALong_4_3 ALong_4_4 ALong_4_5 ALong_4_6;...
+    ALong_5_1 ALong_5_2 ALong_5_3 ALong_5_4 ALong_5_5 ALong_5_6;...
+    ALong_6_1 ALong_6_2 ALong_6_3 ALong_6_4 ALong_6_5 ALong_6_6]
 
 BLong = [BLong_1_1 BLong_1_2;...
-         BLong_2_1 BLong_2_2;...  
-         BLong_3_1 BLong_3_2;...  
-         BLong_4_1 BLong_4_2;...  
-         BLong_5_1 BLong_5_2;...  
-         BLong_6_1 BLong_6_2];  
+    BLong_2_1 BLong_2_2;...
+    BLong_3_1 BLong_3_2;...
+    BLong_4_1 BLong_4_2;...
+    BLong_5_1 BLong_5_2;...
+    BLong_6_1 BLong_6_2];
 
 %% Lat
 
@@ -243,7 +243,7 @@ Y_delta_r = Q_star_S*V_star*C_Y_delta_r;
 
 l_delta_a = Q_star_S*V_star*b*C_l_delta_a;
 l_delta_r = Q_star_S*V_star*b*C_l_delta_r;
- 
+
 N_delta_a = Q_star_S*V_star*b*C_N_delta_a;
 N_delta_r = Q_star_S*V_star*b*C_N_delta_r;
 
@@ -313,18 +313,18 @@ BLat_6_1 = 0;
 BLat_6_2 = 0;
 
 ALat = [ALat_1_1 ALat_1_2 ALat_1_3 ALat_1_4 ALat_1_5 ALat_1_6;...
-         ALat_2_1 ALat_2_2 ALat_2_3 ALat_2_4 ALat_2_5 ALat_2_6;...
-         ALat_3_1 ALat_3_2 ALat_3_3 ALat_3_4 ALat_3_5 ALat_3_6;...
-         ALat_4_1 ALat_4_2 ALat_4_3 ALat_4_4 ALat_4_5 ALat_4_6;...
-         ALat_5_1 ALat_5_2 ALat_5_3 ALat_5_4 ALat_5_5 ALat_5_6;...
-         ALat_6_1 ALat_6_2 ALat_6_3 ALat_6_4 ALat_6_5 ALat_6_6]
+    ALat_2_1 ALat_2_2 ALat_2_3 ALat_2_4 ALat_2_5 ALat_2_6;...
+    ALat_3_1 ALat_3_2 ALat_3_3 ALat_3_4 ALat_3_5 ALat_3_6;...
+    ALat_4_1 ALat_4_2 ALat_4_3 ALat_4_4 ALat_4_5 ALat_4_6;...
+    ALat_5_1 ALat_5_2 ALat_5_3 ALat_5_4 ALat_5_5 ALat_5_6;...
+    ALat_6_1 ALat_6_2 ALat_6_3 ALat_6_4 ALat_6_5 ALat_6_6]
 
 BLat = [BLat_1_1 BLat_1_2;...
-         BLat_2_1 BLat_2_2;...  
-         BLat_3_1 BLat_3_2;...  
-         BLat_4_1 BLat_4_2;...  
-         BLat_5_1 BLat_5_2;...  
-         BLat_6_1 BLat_6_2];  
+    BLat_2_1 BLat_2_2;...
+    BLat_3_1 BLat_3_2;...
+    BLat_4_1 BLat_4_2;...
+    BLat_5_1 BLat_5_2;...
+    BLat_6_1 BLat_6_2];
 
 eigLong = eig(ALong)
 eigLat = eig(ALat)
@@ -338,8 +338,9 @@ x0_Lat = [0;0;0;0;.01;0];
 figure; initial(Long_sys,x0_Long)
 figure; initial(Lat_sys,x0_Lat)
 %lsim(Long_sys, u, t, x0)
-[t_sim_long, x_long] = ode45(@(t,x) ALong*x, [0 400], [1 0 0 0 0 0]'); 
+[t_sim_long, x_long] = ode45(@(t,x) ALong*x, [0 400], [1 0 0 0 0 0]');
 [t_sim_lat, x_lat] = ode45(@(t,x) ALat*x, [0 400], [0 1*pi/180 0 0 0 0]');
+
 
 figure('Name', 'Longitudinal Stick-Fixed Response')
 subplot(511)
@@ -360,7 +361,7 @@ xlabel('t (s)'); ylabel('\Delta \theta (\circ)'); grid on;
 
 subplot(515)
 plot(t_sim_long, x_long(:,5))
-xlabel('t (s)'); ylabel('\Delta z_E ft'); grid on; 
+xlabel('t (s)'); ylabel('\Delta z_E ft'); grid on;
 
 
 figure('Name', 'Lateral stick fixed');
@@ -380,38 +381,156 @@ xlabel('t (s)'); ylabel('r (\circ/s)'); grid on;
 
 subplot(514)
 plot(t_sim_lat, x_lat(:, 4)*180/pi)
-xlabel('t (s)'); ylabel('\phi (\circ)'); grid on; 
+xlabel('t (s)'); ylabel('\phi (\circ)'); grid on;
 
 subplot(515)
 plot(t_sim_lat, x_lat(:,5))
 xlabel('t (s)'); ylabel('\Delta z_E ft'); grid on;
 
 
-     
-p_x = x_long(:,5);
-p_y = x_lat(:,6);
-p_z = x_long(:,6);
-u_b = x_long(:,1);
-v_b = x_lat(:,1);
-w_b = x_long(:,2);
-u_t = 0;
-v_t = 0;
-w_t = 0;
-V = sqrt(u_t.^2 .* v_t.^2 .* w_t^2);
+
+% p_x = x_long(:,5);
+% p_y = x_lat(:,6);
+% p_z = x_long(:,6);
+% u_b = x_long(:,1);
+% v_b = x_lat(:,1);
+% w_b = x_long(:,2);
+% u_t = 0;
+% v_t = 0;
+% w_t = 0;
+% V = sqrt(u_t.^2 .* v_t.^2 .* w_t^2);
+% alpha = atan(w_b./u_b);
+% beta = asin(v_b./V);
+% psi = x_lat(:,5);
+% theta = x_long(:,4);
+% phi = x_lat(:,4);
+% p = x_lat(:,2);
+% q = x_long(:,3);
+% r = x_lat(:,3);
+% 
+% % p_t = [p_x p_y p_z];
+% % V_t = [u_t v_t w_t];
+% % V_b = [u_b v_b w_b];
+% % euler_ang = [psi theta phi];
+% % omega_tb_b = [p q r];
+
+%X = [p_t V_t V_b V euler_ang omega_tb_b]' %alpha;beta;
+n_pts	= 1001;
+time_pts= linspace(0, 300, 1001);
+xLong_from_true	= zeros(6, n_pts);
+control_in_long = zeros(2,n_pts);
+x_long_true =	x0_Long;
+xLong_from_true(:, 1)= x_long_true;
+starT1 = [V_star,alpha_star,beta_star,delta_e_star,delta_t_star,delta_a_star,delta_r_star,u_star,v_star,w_star,p_star,q_star,r_star,psi_star,theta_star,phi_star,m,J_x,J_y,J_z,J_zx,J_xz, rho_star,S,c_bar,b];
+%% LONG
+for m1 = 2:n_pts
+    
+    % RK4 step (Euler)
+    dt	= time_pts(m1) - time_pts(m1 - 1);
+    u1	= control_in_long(:, m1 - 1);
+    u2	= control_in_long(:, m1);
+    u12	= 0.5*(u1 + u2);							% Approx (p,q,r) at (t + 0.5dt)
+    
+    k1	= dt*long_dynamics(x_long_true,				u1, starT1);
+    k2	= dt*long_dynamics((x_long_true + 0.5*k1),	u12, starT1);
+    k3	= dt*long_dynamics((x_long_true + 0.5*k2),	u12, starT1);
+    k4	= dt*long_dynamics((x_long_true + k3),		u2, starT1);
+    x_long_true	= x_long_true + (1/6)*k1 + (1/3)*k2 + (1/3)*k3 + (1/6)*k4;
+    
+    % Record
+    xLong_from_true(:, m1)	= x_long_true;
+end
+%% LAT
+xLat_from_true	= zeros(6, n_pts);
+control_in_lat = zeros(2,n_pts);
+x_lat_true =	x0_Lat;
+xLat_from_true(:, 1)= x_lat_true;
+for m1 = 2:n_pts
+    
+    % RK4 step (Euler)
+    dt	= time_pts(m1) - time_pts(m1 - 1);
+    u1	= control_in_lat(:, m1 - 1);
+    u2	= control_in_lat(:, m1);
+    u12	= 0.5*(u1 + u2);							% Approx (p,q,r) at (t + 0.5dt)
+    
+    k1	= dt*lat_dynamics(x_lat_true,				u1, starT1);
+    k2	= dt*lat_dynamics((x_lat_true + 0.5*k1),	u12, starT1);
+    k3	= dt*lat_dynamics((x_lat_true + 0.5*k2),	u12, starT1);
+    k4	= dt*lat_dynamics((x_lat_true + k3),		u2, starT1);
+    x_lat_true	= x_lat_true + (1/6)*k1 + (1/3)*k2 + (1/3)*k3 + (1/6)*k4;
+    
+    % Record
+    xLat_from_true(:, m1)	= x_lat_true;
+end
+
+p_x = xLong_from_true(5,:);
+p_y = xLat_from_true(6,:);
+p_z = xLong_from_true(6,:);
+u_b = xLong_from_true(1,:);
+v_b = xLat_from_true(1,:);
+w_b = xLong_from_true(2,:);
+u_t = xLong_from_true(1,:);
+v_t = xLat_from_true(1,:);
+w_t = xLong_from_true(2,:);
+V = sqrt(u_t.^2 .* v_t.^2 .* w_t.^2);
 alpha = atan(w_b./u_b);
 beta = asin(v_b./V);
-psi = x_lat(:,5);
-theta = x_long(:,4);
-phi = x_lat(:,4);
-p = x_lat(:,2);
-q = x_long(:,3);
-r = x_lat(:,3);
+psi = xLat_from_true(5,:);
+theta = xLong_from_true(4,:);
+phi = xLat_from_true(4,:);
+p = xLat_from_true(2,:);
+q = xLong_from_true(3,:);
+r = xLat_from_true(3,:);
 
-p_t = [p_x p_y p_z];
-V_t = [u_t v_t w_t];
-V_b = [u_b v_b w_b];
-euler_ang = [psi theta phi];
-omega_tb_b = [p q r];
+p_t = [p_x; p_y; p_z];
+V_t = [u_t; v_t; w_t];
+V_b = [u_b; v_b; w_b];
+euler_ang = [psi; theta; phi];
+omega_tb_b = [p; q; r];
 
-X = [p_t V_t V_b V euler_ang omega_tb_b]' %alpha;beta;
+X = [p_t; V_t; V_b; V; euler_ang; omega_tb_b;];
 
+figure('Name', 'Longitudinal Stick-Fixed Response RK4')
+subplot(511)
+plot(time_pts, xLong_from_true(1,:))
+xlabel('t (s)'); ylabel('\Delta u ft/s'); grid on;
+
+subplot(512)
+plot(time_pts, xLong_from_true(2,:))
+xlabel('t (s)'); ylabel('\Delta w ft/s'); grid on;
+
+subplot(513)
+plot(time_pts, xLong_from_true(3,:)*180/pi)
+xlabel('t (s)'); ylabel('\Delta q (\circ/s)'); grid on;
+
+subplot(514)
+plot(time_pts, xLong_from_true(3,:)*180/pi)
+xlabel('t (s)'); ylabel('\Delta \theta (\circ)'); grid on;
+
+subplot(515)
+plot(time_pts, xLong_from_true(5,:))
+xlabel('t (s)'); ylabel('\Delta z_E ft'); grid on;
+
+
+figure('Name', 'Lateral stick fixed RK4');
+subplot(511)
+plot(time_pts, xLat_from_true(1,:))
+xlabel('t (s)'); ylabel('v ft/s'); grid on;
+
+subplot(512)
+plot(time_pts, xLat_from_true(2,:)*180/pi)
+xlabel('t (s)'); ylabel('p (\circ/s)'); grid on;
+
+
+subplot(513)
+plot(time_pts, xLat_from_true(3,:)*180/pi)
+xlabel('t (s)'); ylabel('r (\circ/s)'); grid on;
+
+
+subplot(514)
+plot(time_pts, xLat_from_true(4,:)*180/pi)
+xlabel('t (s)'); ylabel('\phi (\circ)'); grid on;
+
+subplot(515)
+plot(time_pts, xLat_from_true(5,:))
+xlabel('t (s)'); ylabel('\Delta z_E ft'); grid on;

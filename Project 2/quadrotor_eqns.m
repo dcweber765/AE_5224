@@ -1,4 +1,4 @@
-clc; clear all;
+function X_dot = quadDyanmics(X, OMEGAs, star)
 %% Hummingbird Parameters
 I_xx = 2.32e-3; %kg/m^2
 I_yy = 2.32e-3; %kg/m^2
@@ -52,3 +52,6 @@ ang_dot = inv(I)* u2-cross(omega_b_b,I*omega_b_b);
 p_dot = ang_dot(1);
 q_dot = ang_dot(2);
 r_dot = ang_dot(3);
+
+
+X_dot = [p_x_dot; p_y_dot; p_z_dot; u_dot; v_dot; w_dot; phi_dot; theta_dot;psi_dot;p_dot;q_dot;r_dot];

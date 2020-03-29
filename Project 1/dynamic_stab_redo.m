@@ -22,20 +22,20 @@ V = 30;                            %True airspeed [m/sec]
 %% Trim
 
 V_star = 30;
-alpha_star = 0.0382;
-beta_star = 0;
-delta_e_star = -.0758;
-delta_t_star = .3955;
-delta_a_star = 0;
-delta_r_star = 0;
+alpha_star = 0;
+beta_star = -.2737;
+delta_e_star = -.0448;
+delta_t_star = .4190;
+delta_a_star = .7242;
+delta_r_star = -.8764;
 
-u_star = 29.9781;                             %Initial velocity [ft/sec]
-v_star = 0;
-w_star = 1.1451;
+u_star = 28.8836;                             %Initial velocity [ft/sec]
+v_star = -8.1078;
+w_star = 0;
 
-p_star = .0382;
-q_star = 0;
-r_star = 0;
+p_star = 0;
+q_star = -.0817;
+r_star = .1825;
 
 psi_star = 0;
 theta_star = 0;                %Initial pitch angle [rad]

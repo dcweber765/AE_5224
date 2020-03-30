@@ -1,4 +1,24 @@
 function x_lat_dot = lat_dynamics(x, un, star)
+
+delta_a = un(1);
+delta_r = un(2);
+
+if delta_a > deg2rad(20)
+    delta_a = deg2rad(20);
+elseif delta_a < deg2rad(-20)
+    delta_a = deg2rad(-20);
+end
+
+
+if delta_r > deg2rad(20)
+    delta_r = deg2rad(20);
+elseif delta_r < deg2rad(-20)
+    delta_r = deg2rad(-20);
+end
+
+un(1) = delta_a;
+un(2) = delta_r;
+
 V_star = star(1);
 alpha_star = star(2);
 beta_star = star(3);

@@ -1,5 +1,24 @@
 function x_long_dot = long_dynamics(x, un, star)
 
+delta_e = un(1);
+delta_p = un(2);
+
+if delta_e > deg2rad(20)
+    delta_e = deg2rad(20);
+elseif delta_e < deg2rad(-20)
+    delta_e = deg2rad(-20);
+end
+
+
+if delta_p > 1
+    delta_p = 1;
+elseif delta_p < 0
+    delta_p = 0;
+end
+
+un(1) = delta_e;
+un(2) = delta_p;
+
 V_star = star(1);
 alpha_star = star(2);
 beta_star = star(3);

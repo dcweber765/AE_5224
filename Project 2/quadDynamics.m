@@ -8,9 +8,9 @@ u = X(4);
 v = X(5);
 w = X(6);
 
-phi = X(7);
+psi = X(7);
 theta = X(8);
-psi = X(9);
+phi = X(9);
 
 p = X(10);
 q = X(11);
@@ -20,6 +20,27 @@ omega_1 = OMEGAs(1);
 omega_2 = OMEGAs(2);
 omega_3 = OMEGAs(3);
 omega_4 = OMEGAs(4);
+
+if omega_1 > 9000
+    omega_1 = 9000;
+elseif omega_1 < 0
+    omega_1 = 0;
+end
+if omega_2 > 9000
+    omega_2 = 9000;
+elseif omega_2 < 0
+    omega_2 = 0;
+end
+if omega_3 > 9000
+    omega_3 = 9000;
+elseif omega_3 < 0
+    omega_3 = 0;
+end
+if omega_4 > 9000
+    omega_4 = 9000;
+elseif omega_4 < 0
+    omega_4 = 0;
+end
 
 %% Hummingbird Parameters
 I_xx = 2.32e-3; %kg/m^2

@@ -24,7 +24,7 @@ delta_t_star = .4190;
 delta_a_star = .7242;
 delta_r_star = -.8764;
 
-u_star = 28.8836;                             %Initial velocity [ft/sec]
+u_star = 28.8836;                             %Initial velocity [m/s]
 v_star = -8.1078;
 w_star = 0;
 
@@ -127,46 +127,54 @@ omega_tb_b = [p; q; r];
 X = [p_t; V_t; V_b; V; euler_ang; omega_tb_b;];
 
 figure('Name', 'Longitudinal Stick-Fixed Response RK4')
-subplot(511)
+subplot(611)
 plot(time_pts, xLong_from_true(1,:))
-xlabel('t (s)'); ylabel('\Delta u ft/s'); grid on;
+xlabel('t (s)'); ylabel('\Delta u m/s'); grid on;
 
-subplot(512)
+subplot(612)
 plot(time_pts, xLong_from_true(2,:))
-xlabel('t (s)'); ylabel('\Delta w ft/s'); grid on;
+xlabel('t (s)'); ylabel('\Delta w m/s'); grid on;
 
-subplot(513)
+subplot(613)
 plot(time_pts, xLong_from_true(3,:)*180/pi)
 xlabel('t (s)'); ylabel('\Delta q (\circ/s)'); grid on;
 
-subplot(514)
-plot(time_pts, xLong_from_true(3,:)*180/pi)
+subplot(614)
+plot(time_pts, xLong_from_true(4,:)*180/pi)
 xlabel('t (s)'); ylabel('\Delta \theta (\circ)'); grid on;
 
-subplot(515)
+subplot(615)
 plot(time_pts, xLong_from_true(5,:))
-xlabel('t (s)'); ylabel('\Delta z_E ft'); grid on;
+xlabel('t (s)'); ylabel('\Delta p_z m'); grid on;
+
+subplot(616)
+plot(time_pts, xLong_from_true(6,:))
+xlabel('t (s)'); ylabel('\Delta p_x m'); grid on;
 
 
 figure('Name', 'Lateral stick fixed RK4');
-subplot(511)
+subplot(611)
 plot(time_pts, xLat_from_true(1,:))
 xlabel('t (s)'); ylabel('v ft/s'); grid on;
 
-subplot(512)
+subplot(612)
 plot(time_pts, xLat_from_true(2,:)*180/pi)
 xlabel('t (s)'); ylabel('p (\circ/s)'); grid on;
 
 
-subplot(513)
+subplot(613)
 plot(time_pts, xLat_from_true(3,:)*180/pi)
 xlabel('t (s)'); ylabel('r (\circ/s)'); grid on;
 
 
-subplot(514)
+subplot(614)
 plot(time_pts, xLat_from_true(4,:)*180/pi)
 xlabel('t (s)'); ylabel('\phi (\circ)'); grid on;
 
-subplot(515)
-plot(time_pts, xLat_from_true(5,:))
-xlabel('t (s)'); ylabel('\Delta z_E ft'); grid on;
+subplot(615)
+plot(time_pts, xLat_from_true(5,:)*180/pi)
+xlabel('t (s)'); ylabel('\psi (\circ)'); grid on;
+
+subplot(616)
+plot(time_pts, xLat_from_true(6,:))
+xlabel('t (s)'); ylabel('\Delta p_y ft'); grid on;

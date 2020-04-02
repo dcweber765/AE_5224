@@ -8,9 +8,9 @@ u = X(4);
 v = X(5);
 w = X(6);
 
-psi = X(7);
+psi = X(9);
 theta = X(8);
-phi = X(9);
+phi = X(7);
 
 p = X(10);
 q = X(11);
@@ -73,12 +73,12 @@ V_b = [u v w]';
 P_dot = R_v_b*V_b;
 p_x_dot = P_dot(1);
 p_y_dot = P_dot(2);
-p_z_dot = P_dot(3);
+p_z_dot = -P_dot(3);
 %% Wind rates
 u1 = F1+F2+F3+F4;
 % SCD0 =  w*0.95; %Piazza -> S*CD0 should be less than 10% of the weight
 % Drag = (1/2)*rho*V^2*SCD0;
-V_dot = [0 0 -g]'+ (1/m)*inv(R_v_b)*[0 0 u1]';
+V_dot = [0 0 W]'+ (1/m)*inv(R_v_b)*[0 0 u1]';
 u_dot = V_dot(1);
 v_dot = V_dot(2);
 w_dot = V_dot(3);

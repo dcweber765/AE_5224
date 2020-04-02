@@ -1,11 +1,12 @@
 close all; clear variables
 
-x0 = [0;0;100;0;0;.1;0;0;0;0;0;0];
+x0 = [0;0;100;0;0;-10;0;.3;0;0;0;0];
 
 n_pts	= 1001;
 time_pts= linspace(0, 300, 1001);
 Xstate_from_true	= zeros(12, n_pts);
 control_in_OMEGA = zeros(4,n_pts);
+control_in_OMEGA(:,1) = [994;994;994;994];
 X_true =	x0;
 Xstate_from_true(:, 1)= X_true;
 starT1 = 0;%[V_star,alpha_star,beta_star,delta_e_star,delta_t_star,delta_a_star,delta_r_star,u_star,v_star,w_star,p_star,q_star,r_star,psi_star,theta_star,phi_star,m,J_x,J_y,J_z,J_zx,J_xz, rho_star,S,c_bar,b];
@@ -28,6 +29,8 @@ for m1 = 2:n_pts
     Xstate_from_true(:, m1)	= X_true;
 end
 
+euler_fromTrue = [Xstate_from_true(7,:);Xstate_from_true(8,:);Xstate_from_true(9,:)];
+q = angle2quat(Xstate_from_true(7,:), Xstate_from_true(8,:), Xstate_from_true(9,:), 'YXZ')';
 figure('Name', 'Pos Stick-Fixed Response RK4')
 subplot(311)
 plot(time_pts, Xstate_from_true(1,:))
@@ -54,4 +57,29 @@ subplot(313)
 plot(time_pts, Xstate_from_true(6,:))
 xlabel('t (s)'); ylabel('\Delta w m/s'); grid on;
 
+figure('Name', 'Euler Stick-Fixed Response RK4')
+subplot(311)
+plot(time_pts, Xstate_from_true(7,:))
+xlabel('t (s)'); ylabel('\Delta \phi rad'); grid on;
 
+subplot(312)
+plot(time_pts, Xstate_from_true(8,:))
+xlabel('t (s)'); ylabel('\Delta \theta rad'); grid on;
+
+subplot(313)
+plot(time_pts, Xstate_from_true(9,:))
+xlabel('t (s)'); ylabel('\Delta \psi rad'); grid on;
+
+figure('Name', 'Quat Stick-Fixed Response RK4')
+subplot(411)
+plot(time_pts, q(1,:))
+xlabel('t (s)'); ylabel('||q||'); grid on;
+subplot(412)
+plot(time_pts, q(2,:))
+xlabel('t (s)'); ylabel('\Delta e_0'); grid on;
+subplot(413)
+plot(time_pts, q(3,:))
+xlabel('t (s)'); ylabel('\Delta e_1'); grid on;
+subplot(414)
+plot(time_pts, q(4,:))
+xlabel('t (s)'); ylabel('\Delta e_3'); grid on;
